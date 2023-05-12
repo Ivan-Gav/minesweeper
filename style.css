@@ -1,0 +1,75 @@
+
+* {
+  box-sizing: border-box;
+}
+
+.wrapper {
+display: block;
+margin: auto;
+width: fit-content;
+}
+
+.head {
+  min-height: 100px;
+  border: solid 10px lightgrey;
+  border-bottom: none;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: fit-content;
+  border: ridge 10px lightgrey;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+} 
+
+.cell {
+  width: 24px;
+  height: 24px;
+  background-color: rgb(187, 187, 187);
+  border: outset 3px lightgray;
+  /* margin: 0 -1px -1px 0; */
+}
+
+.cell_opened {
+  border: solid 1px gray;
+
+} 
+
+.cell_flag {
+  
+}
+
+.cell_type_1 {
+  color:blue;
+}
+
+.cell_type_2 {
+  color:green;
+}
+
+.cell_type_3 {
+  color:red;
+}
+
+.cell_type_4 {
+  color: purple;
+}
+
+.cell_type_5 {
+  color: magenta;
+}
+
+.cell_type_bomb {
+  color: black;
+} 
+
+.cell_type_bomb-exploded {
+  background-color: red;
+}
