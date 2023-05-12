@@ -34,7 +34,7 @@ width: fit-content;
   height: 24px;
   background-color: rgb(187, 187, 187);
   border: outset 3px lightgray;
-  /* margin: 0 -1px -1px 0; */
+  /* color: transparent; */
 }
 
 .cell_opened {
@@ -43,7 +43,7 @@ width: fit-content;
 } 
 
 .cell_flag {
-  
+  background-color: orange;
 }
 
 .cell_type_1 {
