@@ -3,6 +3,8 @@ const body = document.querySelector('body');
 const fieldMatrix = [];
 const colNr = 15;
 const rowNr = 15;
+const bombsNumber = 30;
+let moveCounter = 0;
 
 // defining Class for cell 
 class Cell {
@@ -64,12 +66,12 @@ const setField = () => {
 }
 // ----------------------------------------------------
 
-// setting mines on the field
-const mine = (minesNr, startingCellNr) => {
+// setting bombs on the field
+const plantBombs = (bombsNr, startingCellNr) => {
   const fieldSize = colNr * rowNr;
   const minedCells = new Set();
 
-  while (minedCells.size < minesNr) {
+  while (minedCells.size < bombsNr) {
     let nr = Math.round(fieldSize * Math.random())
     if (nr !== startingCellNr) {
       minedCells.add(nr)
@@ -110,7 +112,6 @@ const openAround = (cellNumber) => {
   const openAdjacentCell = (nr) => {
     if (!fieldMatrix[nr].opened) {
       fieldMatrix[nr].openCell();
-      console.log(`Open cell in row ${fieldMatrix[nr].row}, col ${fieldMatrix[nr].col}`);
       if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
     }
   }
@@ -124,9 +125,6 @@ const openAround = (cellNumber) => {
   if (row < (rowNr - 1)) { openAdjacentCell(number + colNr) };
   if ((col < (colNr - 1)) && (row < (rowNr - 1))) { openAdjacentCell(number + colNr + 1) };
 }
-
-
-
 // ----------------------------------------------------
 
 // handle clicks
@@ -135,11 +133,9 @@ const handleClicks = () => {
   // right clics
   field.addEventListener('contextmenu', (e) => {
     const cell = e.target;
-    if (cell.classList.contains('cell')) {
-      e.preventDefault();
-      if (!cell.classList.contains('cell_opened')) {
-        cell.classList.toggle('cell_flag');
-      }
+    if ((cell.classList.contains('cell'))
+      && (!cell.classList.contains('cell_opened'))) {
+      cell.classList.toggle('cell_flag');
     }
   });
 
@@ -148,29 +144,50 @@ const handleClicks = () => {
     const cell = e.target;
     if ((cell.classList.contains('cell'))
       && (!cell.classList.contains('cell_flag'))) {
-      cell.classList.add('cell_opened');
       const nr = cell.dataset.number;
+      fieldMatrix[nr].openCell();
+      // cell.classList.add('cell_opened');
+      moveCounter++;
       if (fieldMatrix[nr].bomb) {
         // clicked on a bomb
         cell.classList.add('cell_type_bomb-exploded');
         // gameOver();
       } else {
-        cell.innerText = fieldMatrix[nr].bombsAround;
         if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
       }
-
-
-
     }
   });
 }
 // ----------------------------------------------------
 
+// handling first click
+const start = () => {
+  const field = document.querySelector('.field');
 
+  field.addEventListener('contextmenu', (e) => {
+    const cell = e.target;
+    if (cell.classList.contains('cell')) {
+      e.preventDefault();
+    }
+  });
 
+  const initialClickHandler = (e) => {
+    const cell = e.target;
+    if (cell.classList.contains('cell')) {
+      const nr = cell.dataset.number
+      plantBombs(bombsNumber, nr);
+      moveCounter++;
+      countAround();
+      fieldMatrix[nr].openCell();
+      if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
+      handleClicks();
+      console.log(fieldMatrix);
+    }
+    field.removeEventListener('click', initialClickHandler);
+  }
+  field.addEventListener('click', initialClickHandler);
+}
+// ----------------------------------------------------
 
 setField();
-mine(30);
-countAround();
-handleClicks();
-console.log(fieldMatrix);
+start();
