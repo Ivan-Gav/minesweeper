@@ -1,6 +1,8 @@
 
 const body = document.querySelector('body');
 const fieldMatrix = [];
+const colNr = 15;
+const rowNr = 15;
 
 // defining Class for cell 
 class Cell {
@@ -22,6 +24,14 @@ class Cell {
 
     return cell;
   }
+
+  openCell() {
+    let cell = document.querySelector(`[data-number="${this.number}"]`);
+    cell.classList.remove('cell_flag');
+    cell.classList.add('cell_opened');
+    cell.innerText = this.bombsAround;
+    this.opened = true;
+  }
 }
 // ----------------------------------------------------
 
@@ -32,7 +42,7 @@ const makeDiv = (divname) => {
 }
 
 // creating the field 
-const setField = (colNr, rowNr) => {
+const setField = () => {
   const wrapper = makeDiv('wrapper');
   const head = makeDiv('head');
   const field = makeDiv('field');
@@ -55,7 +65,7 @@ const setField = (colNr, rowNr) => {
 // ----------------------------------------------------
 
 // setting mines on the field
-const mine = (colNr, rowNr, minesNr, startingCellNr) => {
+const mine = (minesNr, startingCellNr) => {
   const fieldSize = colNr * rowNr;
   const minedCells = new Set();
 
@@ -70,41 +80,53 @@ const mine = (colNr, rowNr, minesNr, startingCellNr) => {
 // ----------------------------------------------------
 
 // count bombs around each cell
-const countAround = (fieldMatrix, colNr, rowNr) => {
-  
+const countAround = () => {
+
   fieldMatrix.forEach(cell => {
     const { row, col, number, bomb } = cell;
     if (!bomb) {
       let count = 0
-        if ((row > 0) && (col > 0)) { count += (fieldMatrix[number - colNr - 1].bomb) ? 1 : 0}
-        if (row > 0) { count += (fieldMatrix[number - colNr].bomb) ? 1 : 0}
-        if ((row > 0) && (col < (colNr - 1))) { count += (fieldMatrix[number - colNr + 1].bomb) ? 1 : 0}
-        if (col > 0) { count += (fieldMatrix[number - 1].bomb) ? 1 : 0}
-        if (col < (colNr - 1)) { count += (fieldMatrix[number + 1].bomb) ? 1 : 0}
-        if ((col > 0) && (row < (rowNr - 1))) { count += (fieldMatrix[number + colNr - 1].bomb) ? 1 : 0}
-        if (row < (rowNr - 1)) { count += (fieldMatrix[number + colNr].bomb) ? 1 : 0}
-        if ((col < (colNr - 1)) && (row < (rowNr - 1))) { count += (fieldMatrix[number + colNr +1 ].bomb) ? 1 : 0}
+      if ((row > 0) && (col > 0)) { count += (fieldMatrix[number - colNr - 1].bomb) ? 1 : 0 }
+      if (row > 0) { count += (fieldMatrix[number - colNr].bomb) ? 1 : 0 }
+      if ((row > 0) && (col < (colNr - 1))) { count += (fieldMatrix[number - colNr + 1].bomb) ? 1 : 0 }
+      if (col > 0) { count += (fieldMatrix[number - 1].bomb) ? 1 : 0 }
+      if (col < (colNr - 1)) { count += (fieldMatrix[number + 1].bomb) ? 1 : 0 }
+      if ((col > 0) && (row < (rowNr - 1))) { count += (fieldMatrix[number + colNr - 1].bomb) ? 1 : 0 }
+      if (row < (rowNr - 1)) { count += (fieldMatrix[number + colNr].bomb) ? 1 : 0 }
+      if ((col < (colNr - 1)) && (row < (rowNr - 1))) { count += (fieldMatrix[number + colNr + 1].bomb) ? 1 : 0 }
 
-        cell.bombsAround = count;
+      cell.bombsAround = count;
 
-      }
+    }
   })
-  // for (let i = 0; i < rowNr; i++) {
-  //   for (let j = 0; j < colNr; j++) {
-  //     let count = 0
-  //       if ((i > 0) && (j > 0)) { count += (matrix[i - 1][j - 1]) ? 1 : 0}
-  //       if (i > 0) { count += (matrix[i - 1][j]) ? 1 : 0}
-  //       if ((i > 0) && (j < cols)) { count += (matrix[i - 1][j + 1]) ? 1 : 0}
-  //       if (j > 0) { count += (matrix[i][j - 1]) ? 1 : 0}
-  //       if (j < cols) { count += (matrix[i][j + 1]) ? 1 : 0}
-  //       if ((j > 0) && (i < rows)) { count += (matrix[i + 1][j - 1]) ? 1 : 0}
-  //       if (i < rows) { count += (matrix[i+1][j]) ? 1 : 0}
-  //       if ((j < cols) && (i < rows)) { count += (matrix[i + 1][j + 1]) ? 1 : 0}
-        
-  //   }
-  // }
-  
 }
+// ----------------------------------------------------
+
+// open cells around when zero
+const openAround = (cellNumber) => {
+  const cell = fieldMatrix[cellNumber];
+  const { row, col, number } = cell;
+
+  const openAdjacentCell = (nr) => {
+    if (!fieldMatrix[nr].opened) {
+      fieldMatrix[nr].openCell();
+      console.log(`Open cell in row ${fieldMatrix[nr].row}, col ${fieldMatrix[nr].col}`);
+      if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
+    }
+  }
+
+  if ((row > 0) && (col > 0)) { openAdjacentCell(number - colNr - 1) };
+  if (row > 0) { openAdjacentCell(number - colNr) };
+  if ((row > 0) && (col < (colNr - 1))) { openAdjacentCell(number - colNr + 1) };
+  if (col > 0) { openAdjacentCell(number - 1) };
+  if (col < (colNr - 1)) { openAdjacentCell(number + 1) };
+  if ((col > 0) && (row < (rowNr - 1))) { openAdjacentCell(number + colNr - 1) };
+  if (row < (rowNr - 1)) { openAdjacentCell(number + colNr) };
+  if ((col < (colNr - 1)) && (row < (rowNr - 1))) { openAdjacentCell(number + colNr + 1) };
+}
+
+
+
 // ----------------------------------------------------
 
 // handle clicks
@@ -126,17 +148,18 @@ const handleClicks = () => {
     const cell = e.target;
     if ((cell.classList.contains('cell'))
       && (!cell.classList.contains('cell_flag'))) {
-        cell.classList.add('cell_opened');
-        const nr = cell.dataset.number;
-        if (fieldMatrix[nr].bomb) {
-          // clicked on a bomb
-          cell.classList.add('cell_type_bomb-exploded');
-          // gameOver();
-        } else {
-          cell.innerText = fieldMatrix[nr].bombsAround;
-        }
+      cell.classList.add('cell_opened');
+      const nr = cell.dataset.number;
+      if (fieldMatrix[nr].bomb) {
+        // clicked on a bomb
+        cell.classList.add('cell_type_bomb-exploded');
+        // gameOver();
+      } else {
+        cell.innerText = fieldMatrix[nr].bombsAround;
+        if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
+      }
 
-        
+
 
     }
   });
@@ -146,21 +169,8 @@ const handleClicks = () => {
 
 
 
-setField(15, 15);
-mine(15, 15, 40,);
-countAround(fieldMatrix, 15, 15);
+setField();
+mine(30);
+countAround();
 handleClicks();
 console.log(fieldMatrix);
-
-
-// temporary code to test styles
-// document.querySelectorAll('.cell').forEach(cell => {
-//   if (((cell.dataset.row === '1')
-//     || cell.dataset.row === '2')
-//     && ((cell.dataset.col === '2')
-//       || (cell.dataset.col === '3')
-//       || (cell.dataset.col === '4')
-//       || (cell.dataset.col === '5'))) {
-//     cell.classList.add('opened')
-//   }
-// });
