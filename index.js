@@ -1,10 +1,10 @@
-
 const body = document.querySelector('body');
 const fieldMatrix = [];
-const colNr = 15;
-const rowNr = 15;
-const bombsNumber = 30;
+const colNr = 10;
+const rowNr = 10;
+const bombsNumber = 10;
 let moveCounter = 0;
+let openCounter = 0;
 
 // defining Class for cell 
 class Cell {
@@ -23,7 +23,6 @@ class Cell {
     cell.setAttribute('data-number', this.number);
     cell.setAttribute('data-row', this.row);
     cell.setAttribute('data-col', this.col);
-
     return cell;
   }
 
@@ -33,15 +32,35 @@ class Cell {
     cell.classList.add('cell_opened');
     cell.innerText = this.bombsAround;
     this.opened = true;
+    openCounter++;
+  }
+
+  showBomb() {
+    let cell = document.querySelector(`[data-number="${this.number}"]`);
+    cell.classList.remove('cell_flag');
+    cell.classList.add('cell_opened');
+    cell.classList.add('cell_type_bomb');
+    this.opened = true;
   }
 }
 // ----------------------------------------------------
 
+// auxillary function to create divs
 const makeDiv = (divname) => {
   const div = document.createElement('div');
   div.className = divname;
   return div;
 }
+// ----------------------------------------------------
+
+// creating the header
+// const setHeader = () => {
+
+
+// }
+
+
+// ----------------------------------------------------
 
 // creating the field 
 const setField = () => {
@@ -66,7 +85,7 @@ const setField = () => {
 }
 // ----------------------------------------------------
 
-// setting bombs on the field
+// planting bombs on the field
 const plantBombs = (bombsNr, startingCellNr) => {
   const fieldSize = colNr * rowNr;
   const minedCells = new Set();
@@ -128,35 +147,40 @@ const openAround = (cellNumber) => {
 // ----------------------------------------------------
 
 // handle clicks
+const rightClickHandler = e => {
+  const cell = e.target;
+  if ((cell.classList.contains('cell'))
+    && (!cell.classList.contains('cell_opened'))) {
+    cell.classList.toggle('cell_flag');
+  }
+}
+
+const leftClickHandler = (e) => {
+  const cell = e.target;
+  if ((cell.classList.contains('cell'))
+    && (!cell.classList.contains('cell_flag'))
+    && (!fieldMatrix[cell.dataset.number].opened)) {
+    const nr = cell.dataset.number;
+    fieldMatrix[nr].openCell();
+    moveCounter++;
+    if (fieldMatrix[nr].bomb) {
+      // clicked on a bomb
+      cell.classList.add('cell_type_bomb-exploded');
+      gameOver(false);
+    } else {
+      if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
+      if ((openCounter + bombsNumber) === fieldMatrix.length) { gameOver(true) };
+    }
+  }
+}
+
 const handleClicks = () => {
   const field = document.querySelector('.field');
   // right clics
-  field.addEventListener('contextmenu', (e) => {
-    const cell = e.target;
-    if ((cell.classList.contains('cell'))
-      && (!cell.classList.contains('cell_opened'))) {
-      cell.classList.toggle('cell_flag');
-    }
-  });
+  field.addEventListener('contextmenu', rightClickHandler);
 
   // left clics
-  field.addEventListener('click', (e) => {
-    const cell = e.target;
-    if ((cell.classList.contains('cell'))
-      && (!cell.classList.contains('cell_flag'))) {
-      const nr = cell.dataset.number;
-      fieldMatrix[nr].openCell();
-      // cell.classList.add('cell_opened');
-      moveCounter++;
-      if (fieldMatrix[nr].bomb) {
-        // clicked on a bomb
-        cell.classList.add('cell_type_bomb-exploded');
-        // gameOver();
-      } else {
-        if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
-      }
-    }
-  });
+  field.addEventListener('click', leftClickHandler);
 }
 // ----------------------------------------------------
 
@@ -188,6 +212,25 @@ const start = () => {
   field.addEventListener('click', initialClickHandler);
 }
 // ----------------------------------------------------
+
+// game over
+const gameOver = (win) => {
+  const field = document.querySelector('.field');
+
+  field.removeEventListener('contextmenu', rightClickHandler);
+  field.removeEventListener('click', leftClickHandler);
+
+  fieldMatrix.map(cell => {
+    if (cell.bomb) {
+      cell.showBomb();
+    };
+  })
+
+  const message = win ? 'you win!' : 'you loose!';
+  console.log(message);
+}
+// ----------------------------------------------------
+
 
 setField();
 start();

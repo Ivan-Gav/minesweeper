@@ -67,7 +67,7 @@ width: fit-content;
 }
 
 .cell_type_bomb {
-  color: black;
+  background-color: black;
 } 
 
 .cell_type_bomb-exploded {
