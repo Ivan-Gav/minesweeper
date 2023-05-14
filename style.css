@@ -9,6 +9,15 @@ margin: auto;
 width: fit-content;
 }
 
+.parameters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 500px;
+  margin: 20px auto 40px;
+}
+
+
 .head {
   min-height: 100px;
   border: solid 10px lightgrey;

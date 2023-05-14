@@ -5,6 +5,8 @@ const rowNr = 10;
 const bombsNumber = 10;
 let moveCounter = 0;
 let openCounter = 0;
+let flagCounter = 0;
+let timer = 0;
 
 // defining Class for cell 
 class Cell {
@@ -58,8 +60,37 @@ const makeDiv = (divname) => {
 
 
 // }
+// ----------------------------------------------------
+
+// timer
+
+const formatTime = timer => {
+  let seconds = timer % 60;
+  let minutes = Math.floor(timer / 60) % 60;
+  let hours = Math.floor(timer / 3600);
+  
+  seconds = (seconds < 10) ? '0' + seconds : seconds;
+  minutes = (minutes < 10) ? '0' + minutes : minutes;
+      
+  return hours ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
+}
 
 
+const countTime = () => {
+  const field = document.querySelector('.field')
+  
+  const stopTimer = () => {
+    clearInterval(showTimer);
+    field.removeEventListener('gameOverEvent', stopTimer);
+  }
+    
+  field.addEventListener('gameOverEvent', stopTimer);
+
+  const showTimer = setInterval(() => {
+    timer++;
+    document.querySelector('.time').innerText = formatTime(timer);
+  }, 1000)
+}
 // ----------------------------------------------------
 
 // creating the field 
@@ -82,6 +113,8 @@ const setField = () => {
   wrapper.append(head);
   wrapper.append(field);
   body.append(wrapper);
+
+  document.querySelector('.bombs-nr').innerText = bombsNumber;
 }
 // ----------------------------------------------------
 
@@ -152,6 +185,12 @@ const rightClickHandler = e => {
   if ((cell.classList.contains('cell'))
     && (!cell.classList.contains('cell_opened'))) {
     cell.classList.toggle('cell_flag');
+    if (cell.classList.contains('cell_flag')) {
+      flagCounter++;
+    } else {
+      flagCounter--;
+    }
+    document.querySelector('.flags-nr').innerText = flagCounter;
   }
 }
 
@@ -163,6 +202,7 @@ const leftClickHandler = (e) => {
     const nr = cell.dataset.number;
     fieldMatrix[nr].openCell();
     moveCounter++;
+    document.querySelector('.moves-nr').innerText = moveCounter;
     if (fieldMatrix[nr].bomb) {
       // clicked on a bomb
       cell.classList.add('cell_type_bomb-exploded');
@@ -201,11 +241,13 @@ const start = () => {
       const nr = cell.dataset.number
       plantBombs(bombsNumber, nr);
       moveCounter++;
+      document.querySelector('.moves-nr').innerText = moveCounter;
       countAround();
       fieldMatrix[nr].openCell();
       if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
       handleClicks();
       console.log(fieldMatrix);
+      countTime();
     }
     field.removeEventListener('click', initialClickHandler);
   }
@@ -225,6 +267,9 @@ const gameOver = (win) => {
       cell.showBomb();
     };
   })
+
+  const gameOverEvent = new Event('gameOverEvent');
+  field.dispatchEvent(gameOverEvent);
 
   const message = win ? 'you win!' : 'you loose!';
   console.log(message);
