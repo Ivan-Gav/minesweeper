@@ -63,7 +63,6 @@ const makeDiv = (divname) => {
 // ----------------------------------------------------
 
 // timer
-
 const formatTime = timer => {
   let seconds = timer % 60;
   let minutes = Math.floor(timer / 60) % 60;
@@ -74,7 +73,6 @@ const formatTime = timer => {
       
   return hours ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
 }
-
 
 const countTime = () => {
   const field = document.querySelector('.field')
@@ -276,6 +274,34 @@ const gameOver = (win) => {
 }
 // ----------------------------------------------------
 
+// restart
+const restart = () => {
+  moveCounter = 0;
+  openCounter = 0;
+  flagCounter = 0;
+  timer = 0;
+  document.querySelector('.moves-nr').innerText = moveCounter;
+  document.querySelector('.flags-nr').innerText = flagCounter;
+  document.querySelector('.time').innerText = formatTime(timer);
+  fieldMatrix.length = 0;
+
+  const field = document.querySelector('.field');
+  const restartEvent = new Event('gameOverEvent');
+  field.dispatchEvent(restartEvent);
+
+  document.querySelector('.wrapper').remove();
+
+  setField();
+  start();
+}
+
+const handleRestartClick = () => {
+  document.querySelector('.game-status').addEventListener('click', (e) => {
+    restart();
+  });
+}
+// ----------------------------------------------------
 
 setField();
 start();
+handleRestartClick();

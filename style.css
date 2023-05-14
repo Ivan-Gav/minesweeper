@@ -17,6 +17,15 @@ width: fit-content;
   margin: 20px auto 40px;
 }
 
+.game-status {
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  width: 300px;
+  height: 80px;
+  margin: 20px auto 40px;
+  border: solid 1px black;
+}
 
 .head {
   min-height: 100px;
