@@ -25,6 +25,15 @@ width: fit-content;
   height: 80px;
   margin: 20px auto 40px;
   border: solid 1px black;
+  text-align: center;
+}
+
+.win {
+  background-color: lightgreen;
+}
+
+.lose {
+  background-color: lightcoral;
 }
 
 .head {
@@ -48,6 +57,9 @@ width: fit-content;
 } 
 
 .cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 24px;
   height: 24px;
   background-color: rgb(187, 187, 187);

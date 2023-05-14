@@ -17,6 +17,7 @@ class Cell {
     this.bomb = false;
     this.bombsAround = 0;
     this.opened = false;
+    this.flag = false;
   }
 
   generateCell() {
@@ -30,19 +31,34 @@ class Cell {
 
   openCell() {
     let cell = document.querySelector(`[data-number="${this.number}"]`);
-    cell.classList.remove('cell_flag');
     cell.classList.add('cell_opened');
     cell.innerText = this.bombsAround;
     this.opened = true;
     openCounter++;
+    if (this.flag) {
+      cell.classList.remove('cell_flag');
+      this.flag = false;
+      flagCounter--;
+    }
   }
 
   showBomb() {
     let cell = document.querySelector(`[data-number="${this.number}"]`);
-    cell.classList.remove('cell_flag');
     cell.classList.add('cell_opened');
     cell.classList.add('cell_type_bomb');
     this.opened = true;
+    if (this.flag) {
+      cell.classList.remove('cell_flag');
+      this.flag = false;
+      flagCounter--;
+    }
+  }
+
+  toggleFlag() {
+    let cell = document.querySelector(`[data-number="${this.number}"]`);
+    cell.classList.toggle('cell_flag');
+    this.flag = !this.flag;
+    flagCounter += (this.flag) ? 1 : (-1);
   }
 }
 // ----------------------------------------------------
@@ -67,21 +83,21 @@ const formatTime = timer => {
   let seconds = timer % 60;
   let minutes = Math.floor(timer / 60) % 60;
   let hours = Math.floor(timer / 3600);
-  
+
   seconds = (seconds < 10) ? '0' + seconds : seconds;
   minutes = (minutes < 10) ? '0' + minutes : minutes;
-      
+
   return hours ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
 }
 
 const countTime = () => {
   const field = document.querySelector('.field')
-  
+
   const stopTimer = () => {
     clearInterval(showTimer);
     field.removeEventListener('gameOverEvent', stopTimer);
   }
-    
+
   field.addEventListener('gameOverEvent', stopTimer);
 
   const showTimer = setInterval(() => {
@@ -162,6 +178,7 @@ const openAround = (cellNumber) => {
   const openAdjacentCell = (nr) => {
     if (!fieldMatrix[nr].opened) {
       fieldMatrix[nr].openCell();
+      document.querySelector('.flags-nr').innerText = flagCounter;
       if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
     }
   }
@@ -182,12 +199,7 @@ const rightClickHandler = e => {
   const cell = e.target;
   if ((cell.classList.contains('cell'))
     && (!cell.classList.contains('cell_opened'))) {
-    cell.classList.toggle('cell_flag');
-    if (cell.classList.contains('cell_flag')) {
-      flagCounter++;
-    } else {
-      flagCounter--;
-    }
+    fieldMatrix[cell.dataset.number].toggleFlag();
     document.querySelector('.flags-nr').innerText = flagCounter;
   }
 }
@@ -269,8 +281,17 @@ const gameOver = (win) => {
   const gameOverEvent = new Event('gameOverEvent');
   field.dispatchEvent(gameOverEvent);
 
-  const message = win ? 'you win!' : 'you loose!';
-  console.log(message);
+  // const message = win ? 'you win!' : 'you loose!';
+  // console.log(message);
+
+  const resetButton =  document.querySelector('.game-status');
+  if (win) {
+    resetButton.classList.add('win');
+    resetButton.innerText = 'You win!\nPress to start a new game';
+  } else {
+    resetButton.classList.add('lose');
+    resetButton.innerText = 'You lose!\nPress to start a new game';
+  }
 }
 // ----------------------------------------------------
 
@@ -284,6 +305,11 @@ const restart = () => {
   document.querySelector('.flags-nr').innerText = flagCounter;
   document.querySelector('.time').innerText = formatTime(timer);
   fieldMatrix.length = 0;
+
+  const resetButton =  document.querySelector('.game-status');
+  resetButton.classList.remove('win');
+  resetButton.classList.remove('lose');
+  resetButton.innerText = 'Restart';
 
   const field = document.querySelector('.field');
   const restartEvent = new Event('gameOverEvent');
