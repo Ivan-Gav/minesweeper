@@ -5,17 +5,32 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="assets/fontawesome/css/fontawesome.min.css" rel="stylesheet">
+  <link href="assets/fontawesome/css/solid.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <title>Minesweeper</title>
 </head>
 
 <body>
   <header class="header">
+    <nav class="main-menu">
+      <ul class="menu">
+          <li class="menu_item">Easy</li>
+          <li class="menu_item">Medium</li>
+          <li class="menu_item">Hard</li>
+          <li class="menu_item">Bombs</li>
+          <li class="menu_item">Stats</li>
+      </ul>
+      <ul class="tech-menu">
+          <li class="tech-menu_item">Sound</li>
+          <li class="tech-menu_item">Theme</li>
+      </ul>
+  </nav>
     <div class="parameters">
-      <div class="bombs-display">💣&nbsp;<span class="bombs-nr">-</span></div>
-      <div class="flags-display">🚩&nbsp;<span class="flags-nr">0</span></div>
-      <div class="moves-display">✅&nbsp;<span class="moves-nr">0</span></div>
-      <div class="time-display">⏱️&nbsp;<span class="time">00:00</span></div>
+      <div class="bombs-display"><i class="fa-solid fa-virus"></i>&nbsp;<span class="bombs-nr">-</span></div>
+      <div class="flags-display"><i class="fa-solid fa-flag"></i></i>&nbsp;<span class="flags-nr">0</span></div>
+      <div class="moves-display"><i class="fa-solid fa-arrow-pointer"></i>&nbsp;<span class="moves-nr">0</span></div>
+      <div class="time-display"><i class="fa-solid fa-stopwatch"></i>&nbsp;<span class="time">00:00</span></div>
     </div>
     <div class="game-status">
       Restart

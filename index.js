@@ -32,11 +32,16 @@ class Cell {
   openCell() {
     let cell = document.querySelector(`[data-number="${this.number}"]`);
     cell.classList.add('cell_opened');
-    cell.innerText = this.bombsAround;
+    if (this.bombsAround) {
+      cell.innerText = this.bombsAround;
+      cell.classList.add(`cell_type_${this.bombsAround}`);
+    }
+        
     this.opened = true;
     openCounter++;
     if (this.flag) {
       cell.classList.remove('cell_flag');
+      cell.innerHTML = '';
       this.flag = false;
       flagCounter--;
     }
@@ -46,6 +51,7 @@ class Cell {
     let cell = document.querySelector(`[data-number="${this.number}"]`);
     cell.classList.add('cell_opened');
     cell.classList.add('cell_type_bomb');
+    cell.innerHTML = '<i class="fa-solid fa-virus">'
     this.opened = true;
     if (this.flag) {
       cell.classList.remove('cell_flag');
@@ -56,6 +62,11 @@ class Cell {
 
   toggleFlag() {
     let cell = document.querySelector(`[data-number="${this.number}"]`);
+    // if (this.flag) {
+    //   cell.innerHTML = '';
+    // } else {
+    //   cell.innerHTML = '<i class="fa-solid fa-flag"></i>';
+    // }
     cell.classList.toggle('cell_flag');
     this.flag = !this.flag;
     flagCounter += (this.flag) ? 1 : (-1);
@@ -110,7 +121,7 @@ const countTime = () => {
 // creating the field 
 const setField = () => {
   const wrapper = makeDiv('wrapper');
-  const head = makeDiv('head');
+  // const head = makeDiv('head');
   const field = makeDiv('field');
 
   for (let i = 0; i < rowNr; i++) {
@@ -124,7 +135,7 @@ const setField = () => {
     field.append(row);
   }
 
-  wrapper.append(head);
+  // wrapper.append(head);
   wrapper.append(field);
   body.append(wrapper);
 
