@@ -8,6 +8,33 @@ let openCounter = 0;
 let flagCounter = 0;
 let timer = 0;
 
+
+// Class for switcher
+class Switcher {
+
+  constructor(id) {
+    this.id = id;
+  }
+
+  generateSwitcher() {
+    let switcher = document.createElement('label');
+    switcher.className = 'switcher';
+    let input = document.createElement('input');
+    if (this.id) { input.id = this.id };
+    input.className = 'switcher_input';
+    input.type = 'checkbox';
+    let switcherSpan = document.createElement('span');
+    switcherSpan.className = 'switcher_check';
+
+    switcher.append(input);
+    switcher.append(switcherSpan)
+
+    return switcher
+  }
+}
+
+// ----------------------------------------------------
+
 // defining Class for cell 
 class Cell {
   constructor(row, col, number) {
@@ -36,7 +63,7 @@ class Cell {
       cell.innerText = this.bombsAround;
       cell.classList.add(`cell_type_${this.bombsAround}`);
     }
-        
+
     this.opened = true;
     openCounter++;
     if (this.flag) {
@@ -74,19 +101,16 @@ class Cell {
 }
 // ----------------------------------------------------
 
-// auxillary function to create divs
-const makeDiv = (divname) => {
-  const div = document.createElement('div');
-  div.className = divname;
-  return div;
+// color theme
+const switchTheme = () => {
+  document.querySelector('#theme-dark').addEventListener('change', (e) => {
+    if (e.target.checked) {
+      body.setAttribute('data-dark', 'on')
+    } else {
+      body.removeAttribute('data-dark', 'on')
+    }
+  })
 }
-// ----------------------------------------------------
-
-// creating the header
-// const setHeader = () => {
-
-
-// }
 // ----------------------------------------------------
 
 // timer
@@ -118,9 +142,72 @@ const countTime = () => {
 }
 // ----------------------------------------------------
 
+// auxillary function to create divs
+const makeDiv = (divname) => {
+  const div = document.createElement('div');
+  div.className = divname;
+  return div;
+}
+// ----------------------------------------------------
+
+// creating header
+const setHeader = () => {
+  //   const header = document.createElement('header');
+  //   header.className = 'header';
+  //   header.innerHTML = `    <nav class="main-menu">
+  //   <ul class="menu">
+  //       <li class="menu_item">Easy</li>
+  //       <li class="menu_item">Medium</li>
+  //       <li class="menu_item">Hard</li>
+  //       <li class="menu_item">Bombs</li>
+  //       <li class="menu_item">Stats</li>
+  //   </ul>
+  //   <ul class="tech-menu">
+  //       <li class="tech-menu_item">Sound</li>
+  //       <li class="tech-menu_item">Theme</li>
+  //   </ul>
+  // </nav>`;
+  //   body.append(header);
+
+  const soundSwitch = new Switcher('sound-on');
+  document.querySelector('#sound-switcher').append(soundSwitch.generateSwitcher());
+
+  const themeSwitch = new Switcher('theme-dark');
+  document.querySelector('#theme-switcher').append(themeSwitch.generateSwitcher());
+
+  switchTheme();
+}
+
+
+// ----------------------------------------------------
+
+// creating the parameters section
+const setParametersSection = () => {
+  const wrapper = makeDiv('wrapper');
+  const parameters = makeDiv('parameters');
+  parameters.innerHTML = `<div class="icon bombs-display"><span class="bombs-nr">-</span></div>
+  <div class="icon flags-display"><span class="flags-nr">0</span></div>
+  <div class="icon moves-display"><span class="moves-nr">0</span></div>
+  <div class="icon time-display"><span class="time">00:00</span></div>`;
+  const gameStatus = makeDiv('game-status');
+  gameStatus.innerHTML = '<div style="margin-bottom: auto">Click on the field to start</div>';
+
+  wrapper.append(parameters);
+  wrapper.append(gameStatus);
+  body.append(wrapper);
+  document.querySelector('.bombs-nr').innerText = bombsNumber;
+}
+
+const restartButton = () => {
+  const restartBtn = makeDiv('restart');
+  restartBtn.innerText = 'Restart';
+  return restartBtn;
+}
+// ----------------------------------------------------
+
 // creating the field 
 const setField = () => {
-  const wrapper = makeDiv('wrapper');
+  const wrapper = document.querySelector('.wrapper');
   // const head = makeDiv('head');
   const field = makeDiv('field');
 
@@ -137,9 +224,9 @@ const setField = () => {
 
   // wrapper.append(head);
   wrapper.append(field);
-  body.append(wrapper);
+  // body.append(wrapper);
 
-  document.querySelector('.bombs-nr').innerText = bombsNumber;
+  // document.querySelector('.bombs-nr').innerText = bombsNumber;
 }
 // ----------------------------------------------------
 
@@ -269,6 +356,8 @@ const start = () => {
       handleClicks();
       console.log(fieldMatrix);
       countTime();
+      document.querySelector('.game-status').innerHTML = '';
+      document.querySelector('.game-status').append(restartButton());
     }
     field.removeEventListener('click', initialClickHandler);
   }
@@ -295,13 +384,15 @@ const gameOver = (win) => {
   // const message = win ? 'you win!' : 'you loose!';
   // console.log(message);
 
-  const resetButton =  document.querySelector('.game-status');
+  const restartBlock = document.querySelector('.game-status');
   if (win) {
-    resetButton.classList.add('win');
-    resetButton.innerText = 'You win!\nPress to start a new game';
+    restartBlock.classList.add('win');
+    restartBlock.innerHTML = '<div>You win!</div>';
+    restartBlock.append(restartButton()); 
   } else {
-    resetButton.classList.add('lose');
-    resetButton.innerText = 'You lose!\nPress to start a new game';
+    restartBlock.classList.add('lose');
+    restartBlock.innerHTML = '<div>You lose!</div>';
+    restartBlock.append(restartButton());
   }
 }
 // ----------------------------------------------------
@@ -317,10 +408,10 @@ const restart = () => {
   document.querySelector('.time').innerText = formatTime(timer);
   fieldMatrix.length = 0;
 
-  const resetButton =  document.querySelector('.game-status');
-  resetButton.classList.remove('win');
-  resetButton.classList.remove('lose');
-  resetButton.innerText = 'Restart';
+  const restartBlock = document.querySelector('.game-status');
+  restartBlock.classList.remove('win');
+  restartBlock.classList.remove('lose');
+  restartBlock.innerHTML = restartButton();
 
   const field = document.querySelector('.field');
   const restartEvent = new Event('gameOverEvent');
@@ -328,17 +419,26 @@ const restart = () => {
 
   document.querySelector('.wrapper').remove();
 
+  setParametersSection();
   setField();
   start();
+  handleRestartClick();//???
 }
 
 const handleRestartClick = () => {
   document.querySelector('.game-status').addEventListener('click', (e) => {
-    restart();
+    if (e.target.className === 'restart') {
+      restart();
+    }
   });
 }
 // ----------------------------------------------------
 
+setHeader();
+setParametersSection();
 setField();
 start();
 handleRestartClick();
+
+
+

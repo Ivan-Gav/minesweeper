@@ -1,0 +1,394 @@
+:root {
+  --bg-body: #eeeeee;
+  --text-body: #212121;
+  --menu-text-inactive: #dddddd;
+  --menu-text-active: #ff6701;
+  --menu-text-hover: #FFC288;
+  --bg-inactive: #303030;
+  --bg-active: #eeeeee;
+  --explosion: #ff0000;
+  --victory: #00ac00;
+  --field-border: #d3d3d3;
+  --bg-cell: #bbbbbb;
+  --bg-cell-opened: #808080;
+  --flag: #ff0000;
+  --bomb: #212121;
+  --bg-cell-1: #0000ff;
+  --bg-cell-2: #008000;
+  --bg-cell-3: #ff0000;
+  --bg-cell-4: #ff00ff;
+  --bg-cell-5: #800080;
+  --bg-cell-678: #000000;
+}
+
+[data-dark] {
+  --bg-body: #212121;
+  --text-body: #dddddd;
+  --menu-text-inactive: #9e9e9e;
+  --menu-text-active: #FF6701;
+  --menu-text-hover: #FF6701;
+  --bg-inactive: #303030;
+  --bg-active: #212121;
+  --explosion: #ff0000;
+  --victory: #00ac00;
+  --field-border: #b0b0b0;
+  --bg-cell: #7d7d7d;
+  --bg-cell-opened: #5c5c5c;
+  --flag: #ff0000;
+  --bomb: #212121;
+  --bg-cell-1: #6adfff;
+  --bg-cell-2: #45c245;
+  --bg-cell-3: #ff4d4d;
+  --bg-cell-4: #ff6aff;
+  --bg-cell-5: #7b2b7b;
+  --bg-cell-678: #000000;
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-weight: 600;
+  src: url('../assets/fonts/rajdhani-semibold.woff2') format('woff2');
+  src: url('../assets/fonts/rajdhani-semibold.woff2') format('woff');
+} 
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-weight: 700;
+  src: url('../assets/fonts/rajdhani-bold.woff2') format('woff2');
+  src: url('../assets/fonts/rajdhani-bold.woff2') format('woff');
+}
+
+@font-face {
+  font-family: 'Prompt';
+  font-weight: 400;
+  src: url('../assets/fonts/prompt-regular.woff2') format('woff2');
+  src: url('../assets/fonts/prompt-regular.woff') format('woff');
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Prompt', Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  caret-color: transparent;
+  user-select: none;
+}
+
+body {
+  background-color: var(--bg-body);
+  color: var(--text-body);
+  margin: 0;
+  padding: 0;
+  border: none; 
+}
+
+/* ------------------------------------------------ */
+.main-menu {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 2rem;
+  line-height: normal;
+  background-color: var(--bg-inactive);
+}
+
+.menu {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.tech-menu {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.menu_item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  list-style: none;
+}
+
+.menu_item input[type = "radio"] {
+  display: none;
+}
+
+.menu_item label {
+  display: flex;
+  align-items: center;
+  padding: 1rem 3rem;
+  color: var(--menu-text-inactive);
+}
+
+.menu_item input[type = "radio"]:checked + label {
+  color: var(--menu-text-active);
+  background-color: var(--bg-active);
+}
+
+.menu_item label:hover {
+  color: var(--menu-text-hover);
+}
+
+.tech-menu_item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: fit-content;
+  padding: 0 2rem;
+  list-style: none;
+}
+/* ------------------------------------------------ */
+
+.wrapper {
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+margin: auto;
+width: fit-content;
+}
+
+.icon::before {
+  display: inline-block;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+.parameters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 440px;
+  margin: 4rem auto 4rem;
+  font-family: 'Rajdhani';
+  font-size: 2.2rem;
+  font-weight: 600;
+}
+
+.bombs-display,
+.flags-display,
+.moves-display,
+.time-display {
+  width: 25%;
+  padding-left: 1rem;
+}
+
+.bombs-display::before {
+  font: var(--fa-font-solid);
+  content: "\e074";
+  margin-right: 1rem;  
+}
+
+.flags-display::before {
+  font: var(--fa-font-solid);
+  content: "\f024";
+  margin-right: 1rem;  
+}
+
+.moves-display::before {
+  font: var(--fa-font-solid);
+  content: "\f245";
+  margin-right: 1rem;  
+}
+
+.time-display::before {
+  font: var(--fa-font-solid);
+  content: "\f2f2";
+  margin-right: 1rem;  
+}
+
+.bombs-nr,
+.flags-nr,
+.moves-nr,
+.time {
+  color: var(--menu-text-active);
+}
+
+.game-status {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; 
+  align-items: center;
+  width: 440px;
+  height: 8rem;
+  padding: 1rem;
+  margin: 0 auto 4rem;
+  background-color: var(--bg-body);
+  /* border: solid 1px black; */
+  text-align: center;
+  font-size: 2rem;
+}
+
+.win {
+  color: var(--victory);
+}
+
+.lose {
+  color: var(--explosion);
+}
+
+.restart {
+  padding: 0.5rem 2rem;
+  background-color: var(--bg-inactive);
+  color: var(--menu-text-inactive);
+  border-radius: 100px;
+  overflow: hidden;
+  transition: ease-in 0.2s;
+}
+
+.restart:hover {
+  color: var(--menu-text-hover);
+  transition: ease-in 0.2s;
+}
+
+.restart:active {
+  background-color: var(--bg-active );
+  color: var(--menu-text-active);
+  transition: ease-in 0.2s;
+}
+
+/* --------------------------------------------------------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: fit-content;
+  border: ridge 10px var(--field-border);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+} 
+
+.cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--bomb);
+  background-color: var(--bg-cell);
+  border: outset 3px var(--field-border);
+  font-family: 'Rajdhani';
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.cell_opened {
+  border: solid 1px var(--bg-cell-opened);
+
+} 
+
+.cell_flag {
+  font-size: 1.4rem;
+  color: var(--flag);
+}
+
+.cell_flag::before {
+  display: inline-block;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  font: var(--fa-font-solid);
+  content: "\f024";
+}
+
+.cell_type_1 {
+  color: var(--bg-cell-1);
+}
+
+.cell_type_2 {
+  color: var(--bg-cell-2);
+}
+
+.cell_type_3 {
+  color: var(--bg-cell-3);
+}
+
+.cell_type_4 {
+  color: var(--bg-cell-4);
+}
+
+.cell_type_5 {
+  color: var(--bg-cell-5);
+}
+
+.cell_type_6,
+.cell_type_7,
+.cell_type_8 {
+  color: var(--bg-cell-678);
+}
+
+
+.cell_type_bomb {
+  font-size: 1.8rem;
+} 
+
+.cell_type_bomb-exploded {
+  background-color: var(--explosion);
+}
+
+/* --------------------------------------------------------- */
+
+.switcher_input {
+  display: none;
+}
+
+.switcher_check {
+  display: flex;
+  align-items: center;
+  width: 64px;
+  height: 32px;
+  background-color: var(--menu-text-inactive);
+  cursor: pointer;
+  border-radius: 100px;
+  overflow: hidden;
+  transition: ease-in 0.3s;
+}
+
+#sound-on + .switcher_check {
+  --icon: '\f6a9';
+  --icon-checked: '\f028';
+}
+
+#theme-dark + .switcher_check {
+  --icon: '\f185';
+  --icon-checked: '\f186';
+}
+
+.switcher_check::before {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  font: var(--fa-font-solid);  
+  content: var(--icon);
+  font-size: 1.6rem;
+  color: var(--menu-text-inactive);
+  margin-left: 4px;
+  background-color: var(--bg-inactive);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  transition: ease-in 0.2s;
+}
+
+.switcher_check:hover::before,
+.switcher input[type="checkbox"]:checked ~ .switcher_check:hover::before {
+  color: var(--menu-text-hover);
+}
+
+.switcher input[type="checkbox"]:checked ~ .switcher_check::before {
+  content: var(--icon-checked);
+  transform: translateX(32px);
+}
+
