@@ -7,6 +7,7 @@ let moveCounter = 0;
 let openCounter = 0;
 let flagCounter = 0;
 let timer = 0;
+let soundOn = false;
 
 // Class for switcher
 class Switcher {
@@ -71,6 +72,8 @@ class Cell {
       this.flag = false;
       flagCounter--;
     }
+
+    if (soundOn) { clickFX.play() };
   }
 
   showBomb() {
@@ -94,6 +97,7 @@ class Cell {
     //   cell.innerHTML = '<i class="fa-solid fa-flag"></i>';
     // }
     cell.classList.toggle('cell_flag');
+    if (soundOn) { flagFX.play() };
     this.flag = !this.flag;
     flagCounter += (this.flag) ? 1 : (-1);
   }
@@ -110,6 +114,26 @@ const switchTheme = () => {
     }
   })
 }
+// ----------------------------------------------------
+
+//  sound FX
+const switchSound = () => {
+  document.querySelector('#sound-on').addEventListener('change', (e) => {
+    if (e.target.checked) {
+      soundOn = true;
+      if (soundOn) { flagFX.play() };
+    } else {
+      soundOn = false;
+    }
+  })
+}
+
+const clickFX = new Audio ('./assets/sounds/mixkit-arcade-game-jump-coin-216.mp3');
+const flagFX = new Audio ('./assets/sounds/mixkit-classic-click-1117.mp3');
+const loseFX = new Audio ('./assets/sounds/mixkit-arcade-chiptune-explosion-1691.mp3');
+const winFX = new Audio ('./assets/sounds/mixkit-ethereal-fairy-win-sound-2019.mp3');
+
+
 // ----------------------------------------------------
 
 // timer
@@ -367,10 +391,7 @@ const leftClickHandler = (e) => {
       gameOver(false);
     } else {
       if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
-      if ((openCounter + +bombsNumber) === fieldMatrix.length) { 
-        gameOver(true);
-        console.log('gameover - true'); };
-      console.log(`openCounter = ${openCounter}, bombsNumber = ${bombsNumber}`);
+      if ((openCounter + +bombsNumber) === fieldMatrix.length) { gameOver(true); };
     }
   }
 }
@@ -409,7 +430,6 @@ const start = () => {
       fieldMatrix[nr].openCell();
       if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
       handleClicks();
-      // console.log(fieldMatrix);
       countTime();
       document.querySelector('.game-status').innerHTML = '';
       document.querySelector('.game-status').append(restartButton());
@@ -437,15 +457,14 @@ const gameOver = (win) => {
   const gameOverEvent = new Event('gameOverEvent');
   field.dispatchEvent(gameOverEvent);
 
-  // const message = win ? 'you win!' : 'you loose!';
-  // console.log(message);
-
   const restartBlock = document.querySelector('.game-status');
   if (win) {
+    if (soundOn) { winFX.play() };
     restartBlock.classList.add('win');
     restartBlock.innerHTML = '<div>You win!</div>';
     restartBlock.append(restartButton());
   } else {
+    if (soundOn) { loseFX.play() };
     restartBlock.classList.add('lose');
     restartBlock.innerHTML = '<div>You lose!</div>';
     restartBlock.append(restartButton());
@@ -485,6 +504,7 @@ const handleRestartClick = () => {
   document.querySelector('.game-status').addEventListener('click', (e) => {
     if (e.target.className === 'restart') {
       restart();
+      if (soundOn) { flagFX.play() };
     }
   });
 }
@@ -492,6 +512,7 @@ const handleRestartClick = () => {
 
 setHeader();
 setParametersSection();
+switchSound();
 setField();
 start();
 handleRestartClick();
