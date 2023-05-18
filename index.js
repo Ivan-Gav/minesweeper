@@ -235,15 +235,12 @@ const getDifficulty = () => {
     item.addEventListener('change', (e) => {
       if ((e.target.id === 'radio_easy') && (colNr !== 10)) {
         colNr = rowNr = 10;
-        console.log(`${colNr}, ${rowNr}`);
         restart();
       } else if ((e.target.id === 'radio_medium') && (colNr !== 15)) {
         colNr = rowNr = 15;
-        console.log(`${colNr}, ${rowNr}`);
         restart();
       } else if ((e.target.id === 'radio_hard') && (colNr !== 25)) {
         colNr = rowNr = 25;
-        console.log(`${colNr}, ${rowNr}`);
         restart();
       } else if (e.target.id === 'bombs-qty') {
         if ((e.target.value > 9) && (e.target.value < 100) && (e.target.value !== bombsNumber)) {
@@ -274,27 +271,27 @@ const setField = () => {
     }
     field.append(row);
   }
-
-  // wrapper.append(head);
   wrapper.append(field);
-  // body.append(wrapper);
-
-  // document.querySelector('.bombs-nr').innerText = bombsNumber;
 }
 // ----------------------------------------------------
 
 // planting bombs on the field
 const plantBombs = (bombsNr, startingCellNr) => {
-  const fieldSize = colNr * rowNr;
-  const minedCells = new Set();
-
-  while (minedCells.size < bombsNr) {
-    let nr = Math.round(fieldSize * Math.random())
-    if (nr !== startingCellNr) {
-      minedCells.add(nr)
-      fieldMatrix[nr].bomb = true;
-    }
-  }
+  const arr = [];
+  for (let i = 0; i < fieldMatrix.length; i++) {
+    arr.push(i)
+  };
+  arr.splice(+startingCellNr, 1);
+  const randomArr = [];
+  for (let i = 0; i < fieldMatrix.length; i++) {
+    let randomIndex = Math.floor(Math.random() * arr.length)
+    randomArr.push(arr[randomIndex])
+    arr.splice(randomIndex, 1)
+  };
+  randomArr.length = bombsNr;
+  randomArr.forEach(nr => {
+    fieldMatrix[nr].bomb = true;
+  })
 }
 // ----------------------------------------------------
 
@@ -370,7 +367,10 @@ const leftClickHandler = (e) => {
       gameOver(false);
     } else {
       if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
-      if ((openCounter + bombsNumber) === fieldMatrix.length) { gameOver(true) };
+      if ((openCounter + +bombsNumber) === fieldMatrix.length) { 
+        gameOver(true);
+        console.log('gameover - true'); };
+      console.log(`openCounter = ${openCounter}, bombsNumber = ${bombsNumber}`);
     }
   }
 }
@@ -400,6 +400,7 @@ const start = () => {
     const cell = e.target;
     if (cell.classList.contains('cell')) {
       const nr = cell.dataset.number
+      console.log(`frst click - row ${cell.dataset.row}, column ${cell.dataset.col}, number ${cell.dataset.number}`);
       plantBombs(bombsNumber, nr);
       moveCounter++;
       document.querySelector('.bombs-nr').innerText = bombsNumber;
@@ -408,10 +409,11 @@ const start = () => {
       fieldMatrix[nr].openCell();
       if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
       handleClicks();
-      console.log(fieldMatrix);
+      // console.log(fieldMatrix);
       countTime();
       document.querySelector('.game-status').innerHTML = '';
       document.querySelector('.game-status').append(restartButton());
+      if ((openCounter + +bombsNumber) === fieldMatrix.length) { gameOver(true) };
     }
     field.removeEventListener('click', initialClickHandler);
   }
