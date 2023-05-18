@@ -117,7 +117,8 @@ body {
   display: none;
 }
 
-.menu_item label {
+.menu_item label,
+#stats {
   display: flex;
   align-items: center;
   padding: 1rem 3rem;
@@ -129,7 +130,8 @@ body {
   background-color: var(--bg-active);
 }
 
-.menu_item label:hover {
+.menu_item label:hover,
+#stats:hover {
   color: var(--menu-text-hover);
 }
 

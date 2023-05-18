@@ -1,13 +1,12 @@
 const body = document.querySelector('body');
 const fieldMatrix = [];
-const colNr = 10;
-const rowNr = 10;
-const bombsNumber = 10;
+let colNr = 10;
+let rowNr = 10;
+let bombsNumber = 10;
 let moveCounter = 0;
 let openCounter = 0;
 let flagCounter = 0;
 let timer = 0;
-
 
 // Class for switcher
 class Switcher {
@@ -152,22 +151,47 @@ const makeDiv = (divname) => {
 
 // creating header
 const setHeader = () => {
-  //   const header = document.createElement('header');
-  //   header.className = 'header';
-  //   header.innerHTML = `    <nav class="main-menu">
-  //   <ul class="menu">
-  //       <li class="menu_item">Easy</li>
-  //       <li class="menu_item">Medium</li>
-  //       <li class="menu_item">Hard</li>
-  //       <li class="menu_item">Bombs</li>
-  //       <li class="menu_item">Stats</li>
-  //   </ul>
-  //   <ul class="tech-menu">
-  //       <li class="tech-menu_item">Sound</li>
-  //       <li class="tech-menu_item">Theme</li>
-  //   </ul>
-  // </nav>`;
-  //   body.append(header);
+  const header = document.createElement('header');
+  header.className = 'header';
+  header.innerHTML = `    <nav class="main-menu">
+    <div class="menu">
+      <div class="menu_item">
+        <input type="radio" id="radio_easy" name="difficulty" value="easy" checked>
+        <label for="radio_easy">
+          Easy
+        </label>
+      </div>
+      <div class="menu_item">
+        <input type="radio" id="radio_medium" name="difficulty" value="medium">
+        <label for="radio_medium">
+          Medium
+        </label>
+      </div>
+      <div class="menu_item">
+        <input type="radio" id="radio_hard" name="difficulty" value="hard">
+        <label for="radio_hard">
+          Hard
+        </label>
+      </div>
+      <div class="menu_item">
+        <label for="bombs-qty">
+          Bombs:&nbsp;                 
+        <input id="bombs-qty" type="number" min="10" max="99" placeholder="10">
+        </label>
+        
+      </div>
+      <div class="menu_item">
+        <div id="stats">
+          Stats
+        </div>
+      </div>
+    </div>
+    <div class="tech-menu">
+      <div class="tech-menu_item" id="sound-switcher"></div>
+      <div class="tech-menu_item" id="theme-switcher"></div>
+    </div>
+    </nav>`;
+  body.append(header);
 
   const soundSwitch = new Switcher('sound-on');
   document.querySelector('#sound-switcher').append(soundSwitch.generateSwitcher());
@@ -203,6 +227,35 @@ const restartButton = () => {
   restartBtn.innerText = 'Restart';
   return restartBtn;
 }
+// ----------------------------------------------------
+
+// set difficulty and bombs number
+const getDifficulty = () => {
+  document.querySelectorAll('.menu_item').forEach(item => {
+    item.addEventListener('change', (e) => {
+      if ((e.target.id === 'radio_easy') && (colNr !== 10)) {
+        colNr = rowNr = 10;
+        console.log(`${colNr}, ${rowNr}`);
+        restart();
+      } else if ((e.target.id === 'radio_medium') && (colNr !== 15)) {
+        colNr = rowNr = 15;
+        console.log(`${colNr}, ${rowNr}`);
+        restart();
+      } else if ((e.target.id === 'radio_hard') && (colNr !== 25)) {
+        colNr = rowNr = 25;
+        console.log(`${colNr}, ${rowNr}`);
+        restart();
+      } else if (e.target.id === 'bombs-qty') {
+        if ((e.target.value > 9) && (e.target.value < 100) && (e.target.value !== bombsNumber)) {
+          bombsNumber = e.target.value;
+
+        }
+      }
+
+    })
+  })
+}
+
 // ----------------------------------------------------
 
 // creating the field 
@@ -332,7 +385,7 @@ const handleClicks = () => {
 }
 // ----------------------------------------------------
 
-// handling first click
+// handle first click
 const start = () => {
   const field = document.querySelector('.field');
 
@@ -349,6 +402,7 @@ const start = () => {
       const nr = cell.dataset.number
       plantBombs(bombsNumber, nr);
       moveCounter++;
+      document.querySelector('.bombs-nr').innerText = bombsNumber;
       document.querySelector('.moves-nr').innerText = moveCounter;
       countAround();
       fieldMatrix[nr].openCell();
@@ -388,7 +442,7 @@ const gameOver = (win) => {
   if (win) {
     restartBlock.classList.add('win');
     restartBlock.innerHTML = '<div>You win!</div>';
-    restartBlock.append(restartButton()); 
+    restartBlock.append(restartButton());
   } else {
     restartBlock.classList.add('lose');
     restartBlock.innerHTML = '<div>You lose!</div>';
@@ -440,5 +494,6 @@ setField();
 start();
 handleRestartClick();
 
+getDifficulty();
 
 
