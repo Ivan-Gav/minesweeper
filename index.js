@@ -1,7 +1,6 @@
 const body = document.querySelector('body');
 const fieldMatrix = [];
-let colNr = 10;
-let rowNr = 10;
+let cellNr = 10;
 let bombsNumber = 10;
 let moveCounter = 0;
 let openCounter = 0;
@@ -128,11 +127,45 @@ const switchSound = () => {
   })
 }
 
-const clickFX = new Audio ('./assets/sounds/mixkit-arcade-game-jump-coin-216.mp3');
-const flagFX = new Audio ('./assets/sounds/mixkit-classic-click-1117.mp3');
-const loseFX = new Audio ('./assets/sounds/mixkit-arcade-chiptune-explosion-1691.mp3');
-const winFX = new Audio ('./assets/sounds/mixkit-ethereal-fairy-win-sound-2019.mp3');
+const clickFX = new Audio('./assets/sounds/mixkit-arcade-game-jump-coin-216.mp3');
+const flagFX = new Audio('./assets/sounds/mixkit-classic-click-1117.mp3');
+const loseFX = new Audio('./assets/sounds/mixkit-arcade-chiptune-explosion-1691.mp3');
+const winFX = new Audio('./assets/sounds/mixkit-ethereal-fairy-win-sound-2019.mp3');
+// ----------------------------------------------------
 
+// burger menu
+
+const activateBurger = () => {
+  const burger = document.querySelector('.burger');
+  const menu = document.querySelector('.menu');
+  burger.addEventListener('click', () => {
+    burger.classList.toggle('active');
+    menu.classList.toggle('open');
+    if (menu.classList.contains('open')) {
+      addOverlay(menu);
+      document.querySelector('.overlay').addEventListener('click', () => {
+        burger.classList.remove('active');
+        menu.classList.remove('open');
+        removeOverlay(menu);
+      })
+    } else {
+      removeOverlay(menu);
+    }
+  })
+}
+
+const addOverlay = (element) => {
+  const overlay = makeDiv('overlay');
+  element.before(overlay);
+  overlay.classList.add('active')
+  body.classList.add('disable-scroll')
+}
+
+const removeOverlay = (element) => {
+  const overlay = document.querySelector('.overlay');
+  overlay.remove();
+  body.classList.remove('disable-scroll')
+}
 
 // ----------------------------------------------------
 
@@ -178,7 +211,11 @@ const setHeader = () => {
   const header = document.createElement('header');
   header.className = 'header';
   header.innerHTML = `    <nav class="main-menu">
-    <div class="menu">
+
+  <div class="burger">
+    <span></span>
+  </div>
+  <div class="menu">
       <div class="menu_item">
         <input type="radio" id="radio_easy" name="difficulty" value="easy" checked>
         <label for="radio_easy">
@@ -210,6 +247,7 @@ const setHeader = () => {
         </div>
       </div>
     </div>
+   
     <div class="tech-menu">
       <div class="tech-menu_item" id="sound-switcher"></div>
       <div class="tech-menu_item" id="theme-switcher"></div>
@@ -223,8 +261,12 @@ const setHeader = () => {
   const themeSwitch = new Switcher('theme-dark');
   document.querySelector('#theme-switcher').append(themeSwitch.generateSwitcher());
 
+  activateBurger();
+
   switchTheme();
 }
+
+
 
 
 // ----------------------------------------------------
@@ -257,14 +299,14 @@ const restartButton = () => {
 const getDifficulty = () => {
   document.querySelectorAll('.menu_item').forEach(item => {
     item.addEventListener('change', (e) => {
-      if ((e.target.id === 'radio_easy') && (colNr !== 10)) {
-        colNr = rowNr = 10;
+      if ((e.target.id === 'radio_easy') && (cellNr !== 10)) {
+        cellNr = 10;
         restart();
-      } else if ((e.target.id === 'radio_medium') && (colNr !== 15)) {
-        colNr = rowNr = 15;
+      } else if ((e.target.id === 'radio_medium') && (cellNr !== 15)) {
+        cellNr = 15;
         restart();
-      } else if ((e.target.id === 'radio_hard') && (colNr !== 25)) {
-        colNr = rowNr = 25;
+      } else if ((e.target.id === 'radio_hard') && (cellNr !== 25)) {
+        cellNr = 25;
         restart();
       } else if (e.target.id === 'bombs-qty') {
         if ((e.target.value > 9) && (e.target.value < 100) && (e.target.value !== bombsNumber)) {
@@ -284,11 +326,13 @@ const setField = () => {
   const wrapper = document.querySelector('.wrapper');
   // const head = makeDiv('head');
   const field = makeDiv('field');
-
-  for (let i = 0; i < rowNr; i++) {
+  
+  field.classList.add(`fieldsize-${cellNr}`);
+  
+  for (let i = 0; i < cellNr; i++) {
     const row = makeDiv('row');
-    for (let j = 0; j < colNr; j++) {
-      const cellNumber = ((i * colNr) + j);
+    for (let j = 0; j < cellNr; j++) {
+      const cellNumber = ((i * cellNr) + j);
       const cell = new Cell(i, j, cellNumber);
       row.append(cell.generateCell());
       fieldMatrix.push(cell);
@@ -326,14 +370,14 @@ const countAround = () => {
     const { row, col, number, bomb } = cell;
     if (!bomb) {
       let count = 0
-      if ((row > 0) && (col > 0)) { count += (fieldMatrix[number - colNr - 1].bomb) ? 1 : 0 }
-      if (row > 0) { count += (fieldMatrix[number - colNr].bomb) ? 1 : 0 }
-      if ((row > 0) && (col < (colNr - 1))) { count += (fieldMatrix[number - colNr + 1].bomb) ? 1 : 0 }
+      if ((row > 0) && (col > 0)) { count += (fieldMatrix[number - cellNr - 1].bomb) ? 1 : 0 }
+      if (row > 0) { count += (fieldMatrix[number - cellNr].bomb) ? 1 : 0 }
+      if ((row > 0) && (col < (cellNr - 1))) { count += (fieldMatrix[number - cellNr + 1].bomb) ? 1 : 0 }
       if (col > 0) { count += (fieldMatrix[number - 1].bomb) ? 1 : 0 }
-      if (col < (colNr - 1)) { count += (fieldMatrix[number + 1].bomb) ? 1 : 0 }
-      if ((col > 0) && (row < (rowNr - 1))) { count += (fieldMatrix[number + colNr - 1].bomb) ? 1 : 0 }
-      if (row < (rowNr - 1)) { count += (fieldMatrix[number + colNr].bomb) ? 1 : 0 }
-      if ((col < (colNr - 1)) && (row < (rowNr - 1))) { count += (fieldMatrix[number + colNr + 1].bomb) ? 1 : 0 }
+      if (col < (cellNr - 1)) { count += (fieldMatrix[number + 1].bomb) ? 1 : 0 }
+      if ((col > 0) && (row < (cellNr - 1))) { count += (fieldMatrix[number + cellNr - 1].bomb) ? 1 : 0 }
+      if (row < (cellNr - 1)) { count += (fieldMatrix[number + cellNr].bomb) ? 1 : 0 }
+      if ((col < (cellNr - 1)) && (row < (cellNr - 1))) { count += (fieldMatrix[number + cellNr + 1].bomb) ? 1 : 0 }
 
       cell.bombsAround = count;
 
@@ -355,14 +399,14 @@ const openAround = (cellNumber) => {
     }
   }
 
-  if ((row > 0) && (col > 0)) { openAdjacentCell(number - colNr - 1) };
-  if (row > 0) { openAdjacentCell(number - colNr) };
-  if ((row > 0) && (col < (colNr - 1))) { openAdjacentCell(number - colNr + 1) };
+  if ((row > 0) && (col > 0)) { openAdjacentCell(number - cellNr - 1) };
+  if (row > 0) { openAdjacentCell(number - cellNr) };
+  if ((row > 0) && (col < (cellNr - 1))) { openAdjacentCell(number - cellNr + 1) };
   if (col > 0) { openAdjacentCell(number - 1) };
-  if (col < (colNr - 1)) { openAdjacentCell(number + 1) };
-  if ((col > 0) && (row < (rowNr - 1))) { openAdjacentCell(number + colNr - 1) };
-  if (row < (rowNr - 1)) { openAdjacentCell(number + colNr) };
-  if ((col < (colNr - 1)) && (row < (rowNr - 1))) { openAdjacentCell(number + colNr + 1) };
+  if (col < (cellNr - 1)) { openAdjacentCell(number + 1) };
+  if ((col > 0) && (row < (cellNr - 1))) { openAdjacentCell(number + cellNr - 1) };
+  if (row < (cellNr - 1)) { openAdjacentCell(number + cellNr) };
+  if ((col < (cellNr - 1)) && (row < (cellNr - 1))) { openAdjacentCell(number + cellNr + 1) };
 }
 // ----------------------------------------------------
 

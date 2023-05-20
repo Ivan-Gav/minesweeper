@@ -88,16 +88,16 @@ body {
 .main-menu {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   font-size: 2rem;
+  padding-left: 1rem;
   line-height: normal;
   background-color: var(--bg-inactive);
+  height: 5rem;
 }
 
 .menu {
   display: flex;
   justify-content: space-around;
-  align-items: center;
 }
 
 .tech-menu {
@@ -109,7 +109,6 @@ body {
 .menu_item {
   display: flex;
   justify-content: center;
-  align-items: center;
   list-style: none;
 }
 
@@ -122,6 +121,7 @@ body {
   display: flex;
   align-items: center;
   padding: 1rem 3rem;
+  width: 100%;
   color: var(--menu-text-inactive);
 }
 
@@ -169,7 +169,7 @@ width: fit-content;
   width: 440px;
   margin: 4rem auto 4rem;
   font-family: 'Rajdhani';
-  font-size: 2.2rem;
+  font-size: 22px;
   font-weight: 600;
 }
 
@@ -218,13 +218,12 @@ width: fit-content;
   justify-content: flex-end; 
   align-items: center;
   width: 440px;
-  height: 8rem;
+  height: 80px;
   padding: 1rem;
   margin: 0 auto 4rem;
   background-color: var(--bg-body);
-  /* border: solid 1px black; */
   text-align: center;
-  font-size: 2rem;
+  font-size: 20px;
 }
 
 .win {
@@ -236,7 +235,9 @@ width: fit-content;
 }
 
 .restart {
-  padding: 0.5rem 2rem;
+  display: flex;
+  align-items: center;
+  padding: 5px 20px;
   background-color: var(--bg-inactive);
   color: var(--menu-text-inactive);
   border-radius: 100px;
@@ -263,7 +264,7 @@ width: fit-content;
   justify-content: space-between;
   align-items: center;
   width: fit-content;
-  border: ridge 10px var(--field-border);
+  border: ridge 1rem var(--field-border);
 }
 
 .row {
@@ -281,17 +282,20 @@ width: fit-content;
   background-color: var(--bg-cell);
   border: outset 3px var(--field-border);
   font-family: 'Rajdhani';
-  font-size: 2.2rem;
+  font-size: 22px;
   font-weight: 700;
+}
+
+.fa-solid {
+  line-height: 0;
 }
 
 .cell_opened {
   border: solid 1px var(--bg-cell-opened);
-
 } 
 
 .cell_flag {
-  font-size: 1.4rem;
+  font-size: 14px;
   color: var(--flag);
 }
 
@@ -329,13 +333,31 @@ width: fit-content;
   color: var(--bg-cell-678);
 }
 
-
 .cell_type_bomb {
-  font-size: 1.8rem;
+  font-size: 18px;
 } 
 
 .cell_type_bomb-exploded {
   background-color: var(--explosion);
+}
+
+.fieldsize-25 .cell {
+  width: 2.4rem;
+  height: 2.4rem;
+  border: outset 0.3rem var(--field-border);
+  font-size: 2.2rem;
+}
+
+.fieldsize-25 .cell_flag {
+  font-size: 1.4rem;
+}
+
+.fieldsize-25 .cell_type_bomb {
+  font-size: 1.8rem;
+}
+
+.fieldsize-25 .cell_opened {
+  border: solid 1px var(--bg-cell-opened);
 }
 
 /* --------------------------------------------------------- */
@@ -347,8 +369,8 @@ width: fit-content;
 .switcher_check {
   display: flex;
   align-items: center;
-  width: 64px;
-  height: 32px;
+  width: 6.4rem;
+  height: 3.2rem;
   background-color: var(--menu-text-inactive);
   cursor: pointer;
   border-radius: 100px;
@@ -376,10 +398,10 @@ width: fit-content;
   content: var(--icon);
   font-size: 1.6rem;
   color: var(--menu-text-inactive);
-  margin-left: 4px;
+  margin-left: 0.4rem;
   background-color: var(--bg-inactive);
-  width: 24px;
-  height: 24px;
+  width: 2.4rem;
+  height: 2.4rem;
   border-radius: 50%;
   transition: ease-in 0.2s;
 }
@@ -391,6 +413,130 @@ width: fit-content;
 
 .switcher input[type="checkbox"]:checked ~ .switcher_check::before {
   content: var(--icon-checked);
-  transform: translateX(32px);
+  transform: translateX(3.2rem);
 }
 
+/* --------------------------------------------------------- */
+
+.burger{
+  display: none;
+  position: relative;
+  z-index: 60;
+  align-self: center;
+  align-items: center;
+  justify-content: flex-end;
+  width: 3rem;
+  height: 1.8rem;
+  margin-left: 0;
+  transition: margin-left ease-in 0.3s;
+}
+
+.burger span{
+  height: 0.2rem;
+  width: 100%;
+  transform: scale(1);
+  background-color: var(--menu-text-inactive);
+  transition: transform ease-in 0.3s;
+}
+
+.burger:hover span{
+  background-color: var(--menu-text-hover);
+}
+
+.burger::before, .burger::after{
+  content: '';
+  position: absolute;
+  height: 0.2rem;
+  width: 100%;
+  background-color: var(--menu-text-inactive);
+  transition: all 0.3s ease 0s;
+}
+
+.burger:hover::before, .burger:hover::after {
+  background-color: var(--menu-text-hover);
+}
+
+.burger::before { top: 0 }
+
+.burger::after { bottom: 0 }
+
+.burger.active { 
+  margin-left: 25rem;
+  transition: margin-left ease-in 0.3s;
+}
+
+.burger.active span { 
+  transform: scale(0);
+  transition: transform ease-in 0.3s; 
+}
+
+.burger.active::before{
+    top: 50%;
+    transform: rotate(-45deg) translate(0, -50%);
+    transition: transform ease-in 0.3s;
+}
+
+.burger.active::after{
+    bottom: 50%;
+    transform: rotate(45deg) translate(0, 50%);
+    transition: transform ease-in 0.3s;
+}
+
+@media (max-width: 900px) {
+
+  .burger { 
+    display: flex;
+  }
+
+  .menu{
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: fixed;
+      height: 100%;
+      width: 30rem;
+      top: 0; bottom: 0; left: -30rem;
+      z-index: 50;
+      overflow-y: auto;
+      padding-top: 5rem;
+      background-color: var(--bg-inactive);
+      transition: left ease-in 0.3s;      
+  }
+
+  .open {
+    left: 0;
+    transition: left ease-in 0.3s;   
+  }
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 7.5px;
+  }
+}
+
+.overlay {
+  position: fixed;
+  border: none;
+  display: block;
+  width: 100%;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 40;
+  background: rgba(41, 41, 41, 0.0);
+  transition: background-color ease-in 0.9s;
+}
+  
+.overlay.active {
+  pointer-events: auto;
+  background: rgba(41, 41, 41, 0.6);
+  transition: background-color ease-in 0.9s;
+}
+
+.disable-scroll {
+  overflow: hidden;
+}
