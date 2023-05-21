@@ -79,6 +79,21 @@ let game = {
   firstTime: true
 }
 
+let gameStats = []
+
+if (localStorage.gameStats) {
+  gameStats = JSON.parse(localStorage.gameStats);
+} else {
+  gameStats.length = 10;
+  gameStats.fill({
+    fieldsize: '-',
+    bombs: '-',
+    moves: '-',
+    time: '--:--'
+  });
+}
+
+
 if (localStorage.getItem('fieldMatrix') && localStorage.getItem('game')) {
   const tempArr = JSON.parse(localStorage.fieldMatrix);
   tempArr.forEach(cell => {
@@ -89,9 +104,9 @@ if (localStorage.getItem('fieldMatrix') && localStorage.getItem('game')) {
 
 const gameStateChangeHandler = {
   set(target, prop, value) {
-    console.log(`changed ${prop} from ${target[prop]} to ${value}`);
     target[prop] = value;
-    localStorage.clear();
+    // localStorage.clear();
+
     localStorage.setItem('fieldMatrix', JSON.stringify(fieldMatrix));
     localStorage.setItem('game', JSON.stringify(game));
     return true;
@@ -300,6 +315,12 @@ const setHeader = () => {
   const themeSwitch = new Switcher('theme-dark');
   document.querySelector('#theme-switcher').append(themeSwitch.generateSwitcher());
 
+  if (gameState.cellNr == 15) {
+    document.querySelector('#radio_medium').setAttribute('checked', 'true');
+  } else if (gameState.cellNr == 25) {
+    document.querySelector('#radio_hard').setAttribute('checked', 'true');
+  }
+  
   activateBurger();
 
   switchTheme();
@@ -369,7 +390,8 @@ const setField = () => {
 
   field.classList.add(`fieldsize-${gameState.cellNr}`);
 
-  if (fieldMatrix.length) {
+  if (fieldMatrix.length == (gameState.cellNr * gameState.cellNr)) {
+    console.log('get cells from storage')
     for (let i = 0; i < gameState.cellNr; i++) {
       const row = makeDiv('row');
       for (let j = 0; j < gameState.cellNr; j++) {
@@ -385,11 +407,11 @@ const setField = () => {
           }
         }
         row.append(cellDOMelement);
-
       }
       field.append(row);
     }
   } else {
+    console.log('build new cells')
     for (let i = 0; i < gameState.cellNr; i++) {
       const row = makeDiv('row');
       for (let j = 0; j < gameState.cellNr; j++) {
@@ -578,17 +600,45 @@ const gameOver = (win) => {
   field.dispatchEvent(gameOverEvent);
 
   const restartBlock = document.querySelector('.game-status');
+  
   if (win) {
     if (gameState.soundOn) { winFX.play() };
     restartBlock.classList.add('win');
     restartBlock.innerHTML = '<div>You win!</div>';
     restartBlock.append(restartButton());
+    updateStats();
   } else {
     if (gameState.soundOn) { loseFX.play() };
     restartBlock.classList.add('lose');
     restartBlock.innerHTML = '<div>You lose!</div>';
     restartBlock.append(restartButton());
   }
+
+  fieldMatrix.forEach(cell => {
+    cell.bomb = false;
+    cell.bombsAround = 0;
+    cell.opened = false;
+    cell.flag = false;
+  });
+  gameState.firstTime = true;
+  gameState.flagCounter = 0;
+  gameState.openCounter = 0;
+  gameState.moveCounter = 0;
+  gameState.timer = 0;
+}
+
+const updateStats = () => {
+  
+  const gameResult = {
+    fieldsize: `${gameState.cellNr} x ${gameState.cellNr}`,
+    bombs: gameState.bombsNumber,
+    moves: gameState.moveCounter,
+    time: formatTime(gameState.timer)
+  };
+  gameStats.unshift(gameResult);
+  gameStats.length = 10;
+  console.log(gameStats);
+  localStorage.setItem('gameStats', JSON.stringify(gameStats)); 
 }
 // ----------------------------------------------------
 
