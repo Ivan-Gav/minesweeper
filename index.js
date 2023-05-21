@@ -1,38 +1,4 @@
 const body = document.querySelector('body');
-const fieldMatrix = [];
-let cellNr = 10;
-let bombsNumber = 10;
-let moveCounter = 0;
-let openCounter = 0;
-let flagCounter = 0;
-let timer = 0;
-let soundOn = false;
-
-// Class for switcher
-class Switcher {
-
-  constructor(id) {
-    this.id = id;
-  }
-
-  generateSwitcher() {
-    let switcher = document.createElement('label');
-    switcher.className = 'switcher';
-    let input = document.createElement('input');
-    if (this.id) { input.id = this.id };
-    input.className = 'switcher_input';
-    input.type = 'checkbox';
-    let switcherSpan = document.createElement('span');
-    switcherSpan.className = 'switcher_check';
-
-    switcher.append(input);
-    switcher.append(switcherSpan)
-
-    return switcher
-  }
-}
-
-// ----------------------------------------------------
 
 // defining Class for cell 
 class Cell {
@@ -64,15 +30,15 @@ class Cell {
     }
 
     this.opened = true;
-    openCounter++;
+    gameState.openCounter++;
     if (this.flag) {
       cell.classList.remove('cell_flag');
       cell.innerHTML = '';
       this.flag = false;
-      flagCounter--;
+      gameState.flagCounter--;
     }
 
-    if (soundOn) { clickFX.play() };
+    if (gameState.soundOn) { clickFX.play() };
   }
 
   showBomb() {
@@ -84,31 +50,100 @@ class Cell {
     if (this.flag) {
       cell.classList.remove('cell_flag');
       this.flag = false;
-      flagCounter--;
+      gameState.flagCounter--;
     }
   }
 
   toggleFlag() {
     let cell = document.querySelector(`[data-number="${this.number}"]`);
-    // if (this.flag) {
-    //   cell.innerHTML = '';
-    // } else {
-    //   cell.innerHTML = '<i class="fa-solid fa-flag"></i>';
-    // }
     cell.classList.toggle('cell_flag');
-    if (soundOn) { flagFX.play() };
+    if (gameState.soundOn) { flagFX.play() };
     this.flag = !this.flag;
-    flagCounter += (this.flag) ? 1 : (-1);
+    gameState.flagCounter += (this.flag) ? 1 : (-1);
   }
 }
 // ----------------------------------------------------
 
+// initialize gamestate or load it from localstorage
+let fieldMatrix = [];
+
+let game = {
+  cellNr: 10,
+  bombsNumber: 10,
+  moveCounter: 0,
+  openCounter: 0,
+  flagCounter: 0,
+  timer: 0,
+  soundOn: false,
+  darkOn: false,
+  firstTime: true
+}
+
+if (localStorage.getItem('fieldMatrix') && localStorage.getItem('game')) {
+  const tempArr = JSON.parse(localStorage.fieldMatrix);
+  tempArr.forEach(cell => {
+    fieldMatrix.push(Object.assign(new Cell, cell));
+  });
+  game = JSON.parse(localStorage.game);
+}
+
+const gameStateChangeHandler = {
+  set(target, prop, value) {
+    console.log(`changed ${prop} from ${target[prop]} to ${value}`);
+    target[prop] = value;
+    localStorage.clear();
+    localStorage.setItem('fieldMatrix', JSON.stringify(fieldMatrix));
+    localStorage.setItem('game', JSON.stringify(game));
+    return true;
+  },
+}
+
+const gameState = new Proxy(game, gameStateChangeHandler);
+// ----------------------------------------------------
+
+// Class for switcher
+class Switcher {
+
+  constructor(id) {
+    this.id = id;
+  }
+
+  generateSwitcher() {
+    let switcher = document.createElement('label');
+    switcher.className = 'switcher';
+    let input = document.createElement('input');
+    if (this.id) { input.id = this.id };
+    input.className = 'switcher_input';
+    input.type = 'checkbox';
+    let switcherSpan = document.createElement('span');
+    switcherSpan.className = 'switcher_check';
+
+    switcher.append(input);
+    switcher.append(switcherSpan)
+
+    return switcher
+  }
+}
+
+// ----------------------------------------------------
+
+
+
 // color theme
 const switchTheme = () => {
-  document.querySelector('#theme-dark').addEventListener('change', (e) => {
+  const themeSwitcher = document.querySelector('#theme-dark');
+  if (gameState.darkOn) {
+    body.setAttribute('data-dark', 'on')
+    themeSwitcher.setAttribute('checked', 'true');
+  } else {
+    body.removeAttribute('data-dark', 'on')
+  }
+  themeSwitcher.addEventListener('change', (e) => {
     if (e.target.checked) {
+      gameState.darkOn = true;
       body.setAttribute('data-dark', 'on')
     } else {
+      gameState.darkOn = false;
       body.removeAttribute('data-dark', 'on')
     }
   })
@@ -117,12 +152,16 @@ const switchTheme = () => {
 
 //  sound FX
 const switchSound = () => {
-  document.querySelector('#sound-on').addEventListener('change', (e) => {
+  const soundSwitcher = document.querySelector('#sound-on');
+  if (gameState.soundOn) {
+    soundSwitcher.setAttribute('checked', 'true');
+  }
+  soundSwitcher.addEventListener('change', (e) => {
     if (e.target.checked) {
-      soundOn = true;
-      if (soundOn) { flagFX.play() };
+      gameState.soundOn = true;
+      if (gameState.soundOn) { flagFX.play() };
     } else {
-      soundOn = false;
+      gameState.soundOn = false;
     }
   })
 }
@@ -170,10 +209,10 @@ const removeOverlay = (element) => {
 // ----------------------------------------------------
 
 // timer
-const formatTime = timer => {
-  let seconds = timer % 60;
-  let minutes = Math.floor(timer / 60) % 60;
-  let hours = Math.floor(timer / 3600);
+const formatTime = time => {
+  let seconds = time % 60;
+  let minutes = Math.floor(time / 60) % 60;
+  let hours = Math.floor(time / 3600);
 
   seconds = (seconds < 10) ? '0' + seconds : seconds;
   minutes = (minutes < 10) ? '0' + minutes : minutes;
@@ -192,8 +231,8 @@ const countTime = () => {
   field.addEventListener('gameOverEvent', stopTimer);
 
   const showTimer = setInterval(() => {
-    timer++;
-    document.querySelector('.time').innerText = formatTime(timer);
+    gameState.timer++;
+    document.querySelector('.time').innerText = formatTime(gameState.timer);
   }, 1000)
 }
 // ----------------------------------------------------
@@ -265,10 +304,6 @@ const setHeader = () => {
 
   switchTheme();
 }
-
-
-
-
 // ----------------------------------------------------
 
 // creating the parameters section
@@ -280,12 +315,17 @@ const setParametersSection = () => {
   <div class="icon moves-display"><span class="moves-nr">0</span></div>
   <div class="icon time-display"><span class="time">00:00</span></div>`;
   const gameStatus = makeDiv('game-status');
-  gameStatus.innerHTML = '<div style="margin-bottom: auto">Click on the field to start</div>';
+  
+  if (gameState.timer) {
+    gameStatus.append(restartButton());
+  } else {
+    gameStatus.innerHTML = '<div style="margin-bottom: auto">Click on the field to start</div>';
+  }
 
   wrapper.append(parameters);
   wrapper.append(gameStatus);
   body.append(wrapper);
-  document.querySelector('.bombs-nr').innerText = bombsNumber;
+  document.querySelector('.bombs-nr').innerText = gameState.bombsNumber;
 }
 
 const restartButton = () => {
@@ -299,18 +339,18 @@ const restartButton = () => {
 const getDifficulty = () => {
   document.querySelectorAll('.menu_item').forEach(item => {
     item.addEventListener('change', (e) => {
-      if ((e.target.id === 'radio_easy') && (cellNr !== 10)) {
-        cellNr = 10;
+      if ((e.target.id === 'radio_easy') && (gameState.cellNr !== 10)) {
+        gameState.cellNr = 10;
         restart();
-      } else if ((e.target.id === 'radio_medium') && (cellNr !== 15)) {
-        cellNr = 15;
+      } else if ((e.target.id === 'radio_medium') && (gameState.cellNr !== 15)) {
+        gameState.cellNr = 15;
         restart();
-      } else if ((e.target.id === 'radio_hard') && (cellNr !== 25)) {
-        cellNr = 25;
+      } else if ((e.target.id === 'radio_hard') && (gameState.cellNr !== 25)) {
+        gameState.cellNr = 25;
         restart();
       } else if (e.target.id === 'bombs-qty') {
-        if ((e.target.value > 9) && (e.target.value < 100) && (e.target.value !== bombsNumber)) {
-          bombsNumber = e.target.value;
+        if ((e.target.value > 9) && (e.target.value < 100) && (e.target.value !== gameState.bombsNumber)) {
+          gameState.bombsNumber = e.target.value;
 
         }
       }
@@ -326,19 +366,42 @@ const setField = () => {
   const wrapper = document.querySelector('.wrapper');
   // const head = makeDiv('head');
   const field = makeDiv('field');
-  
-  field.classList.add(`fieldsize-${cellNr}`);
-  
-  for (let i = 0; i < cellNr; i++) {
-    const row = makeDiv('row');
-    for (let j = 0; j < cellNr; j++) {
-      const cellNumber = ((i * cellNr) + j);
-      const cell = new Cell(i, j, cellNumber);
-      row.append(cell.generateCell());
-      fieldMatrix.push(cell);
+
+  field.classList.add(`fieldsize-${gameState.cellNr}`);
+
+  if (fieldMatrix.length) {
+    for (let i = 0; i < gameState.cellNr; i++) {
+      const row = makeDiv('row');
+      for (let j = 0; j < gameState.cellNr; j++) {
+        const cellNumber = ((i * gameState.cellNr) + j);
+        const cell = fieldMatrix[cellNumber];
+        const cellDOMelement = cell.generateCell();
+        if (cell.flag) { cellDOMelement.classList.add('cell_flag') }
+        if (cell.opened) {
+          cellDOMelement.classList.add('cell_opened');
+          if (cell.bombsAround) {
+            cellDOMelement.classList.add(`cell_type_${cell.bombsAround}`);
+            cellDOMelement.innerText = cell.bombsAround;
+          }
+        }
+        row.append(cellDOMelement);
+
+      }
+      field.append(row);
     }
-    field.append(row);
+  } else {
+    for (let i = 0; i < gameState.cellNr; i++) {
+      const row = makeDiv('row');
+      for (let j = 0; j < gameState.cellNr; j++) {
+        const cellNumber = ((i * gameState.cellNr) + j);
+        const cell = new Cell(i, j, cellNumber);
+        row.append(cell.generateCell());
+        fieldMatrix.push(cell);
+      }
+      field.append(row);
+    }
   }
+
   wrapper.append(field);
 }
 // ----------------------------------------------------
@@ -349,7 +412,7 @@ const plantBombs = (bombsNr, startingCellNr) => {
   for (let i = 0; i < fieldMatrix.length; i++) {
     arr.push(i)
   };
-  arr.splice(+startingCellNr, 1);
+  arr.splice(startingCellNr, 1);
   const randomArr = [];
   for (let i = 0; i < fieldMatrix.length; i++) {
     let randomIndex = Math.floor(Math.random() * arr.length)
@@ -370,14 +433,14 @@ const countAround = () => {
     const { row, col, number, bomb } = cell;
     if (!bomb) {
       let count = 0
-      if ((row > 0) && (col > 0)) { count += (fieldMatrix[number - cellNr - 1].bomb) ? 1 : 0 }
-      if (row > 0) { count += (fieldMatrix[number - cellNr].bomb) ? 1 : 0 }
-      if ((row > 0) && (col < (cellNr - 1))) { count += (fieldMatrix[number - cellNr + 1].bomb) ? 1 : 0 }
+      if ((row > 0) && (col > 0)) { count += (fieldMatrix[number - gameState.cellNr - 1].bomb) ? 1 : 0 }
+      if (row > 0) { count += (fieldMatrix[number - gameState.cellNr].bomb) ? 1 : 0 }
+      if ((row > 0) && (col < (gameState.cellNr - 1))) { count += (fieldMatrix[number - gameState.cellNr + 1].bomb) ? 1 : 0 }
       if (col > 0) { count += (fieldMatrix[number - 1].bomb) ? 1 : 0 }
-      if (col < (cellNr - 1)) { count += (fieldMatrix[number + 1].bomb) ? 1 : 0 }
-      if ((col > 0) && (row < (cellNr - 1))) { count += (fieldMatrix[number + cellNr - 1].bomb) ? 1 : 0 }
-      if (row < (cellNr - 1)) { count += (fieldMatrix[number + cellNr].bomb) ? 1 : 0 }
-      if ((col < (cellNr - 1)) && (row < (cellNr - 1))) { count += (fieldMatrix[number + cellNr + 1].bomb) ? 1 : 0 }
+      if (col < (gameState.cellNr - 1)) { count += (fieldMatrix[number + 1].bomb) ? 1 : 0 }
+      if ((col > 0) && (row < (gameState.cellNr - 1))) { count += (fieldMatrix[number + gameState.cellNr - 1].bomb) ? 1 : 0 }
+      if (row < (gameState.cellNr - 1)) { count += (fieldMatrix[number + gameState.cellNr].bomb) ? 1 : 0 }
+      if ((col < (gameState.cellNr - 1)) && (row < (gameState.cellNr - 1))) { count += (fieldMatrix[number + gameState.cellNr + 1].bomb) ? 1 : 0 }
 
       cell.bombsAround = count;
 
@@ -394,29 +457,34 @@ const openAround = (cellNumber) => {
   const openAdjacentCell = (nr) => {
     if (!fieldMatrix[nr].opened) {
       fieldMatrix[nr].openCell();
-      document.querySelector('.flags-nr').innerText = flagCounter;
+      document.querySelector('.flags-nr').innerText = gameState.flagCounter;
       if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
     }
   }
 
-  if ((row > 0) && (col > 0)) { openAdjacentCell(number - cellNr - 1) };
-  if (row > 0) { openAdjacentCell(number - cellNr) };
-  if ((row > 0) && (col < (cellNr - 1))) { openAdjacentCell(number - cellNr + 1) };
+  if ((row > 0) && (col > 0)) { openAdjacentCell(number - gameState.cellNr - 1) };
+  if (row > 0) { openAdjacentCell(number - gameState.cellNr) };
+  if ((row > 0) && (col < (gameState.cellNr - 1))) { openAdjacentCell(number - gameState.cellNr + 1) };
   if (col > 0) { openAdjacentCell(number - 1) };
-  if (col < (cellNr - 1)) { openAdjacentCell(number + 1) };
-  if ((col > 0) && (row < (cellNr - 1))) { openAdjacentCell(number + cellNr - 1) };
-  if (row < (cellNr - 1)) { openAdjacentCell(number + cellNr) };
-  if ((col < (cellNr - 1)) && (row < (cellNr - 1))) { openAdjacentCell(number + cellNr + 1) };
+  if (col < (gameState.cellNr - 1)) { openAdjacentCell(number + 1) };
+  if ((col > 0) && (row < (gameState.cellNr - 1))) { openAdjacentCell(number + gameState.cellNr - 1) };
+  if (row < (gameState.cellNr - 1)) { openAdjacentCell(number + gameState.cellNr) };
+  if ((col < (gameState.cellNr - 1)) && (row < (gameState.cellNr - 1))) { openAdjacentCell(number + gameState.cellNr + 1) };
 }
 // ----------------------------------------------------
 
 // handle clicks
 const rightClickHandler = e => {
   const cell = e.target;
+
+  if (cell.classList.contains('cell')) {
+    e.preventDefault();
+  }
+
   if ((cell.classList.contains('cell'))
     && (!cell.classList.contains('cell_opened'))) {
     fieldMatrix[cell.dataset.number].toggleFlag();
-    document.querySelector('.flags-nr').innerText = flagCounter;
+    document.querySelector('.flags-nr').innerText = gameState.flagCounter;
   }
 }
 
@@ -427,15 +495,15 @@ const leftClickHandler = (e) => {
     && (!fieldMatrix[cell.dataset.number].opened)) {
     const nr = cell.dataset.number;
     fieldMatrix[nr].openCell();
-    moveCounter++;
-    document.querySelector('.moves-nr').innerText = moveCounter;
+    gameState.moveCounter++;
+    document.querySelector('.moves-nr').innerText = gameState.moveCounter;
     if (fieldMatrix[nr].bomb) {
       // clicked on a bomb
       cell.classList.add('cell_type_bomb-exploded');
       gameOver(false);
     } else {
       if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
-      if ((openCounter + +bombsNumber) === fieldMatrix.length) { gameOver(true); };
+      if ((gameState.openCounter + +gameState.bombsNumber) === fieldMatrix.length) { gameOver(true); };
     }
   }
 }
@@ -466,10 +534,10 @@ const start = () => {
     if (cell.classList.contains('cell')) {
       const nr = cell.dataset.number
       console.log(`frst click - row ${cell.dataset.row}, column ${cell.dataset.col}, number ${cell.dataset.number}`);
-      plantBombs(bombsNumber, nr);
-      moveCounter++;
-      document.querySelector('.bombs-nr').innerText = bombsNumber;
-      document.querySelector('.moves-nr').innerText = moveCounter;
+      plantBombs(gameState.bombsNumber, nr);
+      gameState.moveCounter++;
+      document.querySelector('.bombs-nr').innerText = gameState.bombsNumber;
+      document.querySelector('.moves-nr').innerText = gameState.moveCounter;
       countAround();
       fieldMatrix[nr].openCell();
       if (fieldMatrix[nr].bombsAround === 0) { openAround(nr) };
@@ -477,11 +545,19 @@ const start = () => {
       countTime();
       document.querySelector('.game-status').innerHTML = '';
       document.querySelector('.game-status').append(restartButton());
-      if ((openCounter + +bombsNumber) === fieldMatrix.length) { gameOver(true) };
+      if ((gameState.openCounter + +gameState.bombsNumber) === fieldMatrix.length) { gameOver(true) };
+      gameState.firstTime = false;
     }
     field.removeEventListener('click', initialClickHandler);
   }
   field.addEventListener('click', initialClickHandler);
+}
+
+const displayParameters = () => {
+  document.querySelector('.bombs-nr').innerText = gameState.bombsNumber;
+  document.querySelector('.moves-nr').innerText = gameState.moveCounter;
+  document.querySelector('.flags-nr').innerText = gameState.flagCounter;
+  document.querySelector('.time').innerText = formatTime(gameState.timer);
 }
 // ----------------------------------------------------
 
@@ -503,12 +579,12 @@ const gameOver = (win) => {
 
   const restartBlock = document.querySelector('.game-status');
   if (win) {
-    if (soundOn) { winFX.play() };
+    if (gameState.soundOn) { winFX.play() };
     restartBlock.classList.add('win');
     restartBlock.innerHTML = '<div>You win!</div>';
     restartBlock.append(restartButton());
   } else {
-    if (soundOn) { loseFX.play() };
+    if (gameState.soundOn) { loseFX.play() };
     restartBlock.classList.add('lose');
     restartBlock.innerHTML = '<div>You lose!</div>';
     restartBlock.append(restartButton());
@@ -518,13 +594,13 @@ const gameOver = (win) => {
 
 // restart
 const restart = () => {
-  moveCounter = 0;
-  openCounter = 0;
-  flagCounter = 0;
-  timer = 0;
-  document.querySelector('.moves-nr').innerText = moveCounter;
-  document.querySelector('.flags-nr').innerText = flagCounter;
-  document.querySelector('.time').innerText = formatTime(timer);
+  gameState.moveCounter = 0;
+  gameState.openCounter = 0;
+  gameState.flagCounter = 0;
+  gameState.timer = 0;
+  document.querySelector('.moves-nr').innerText = gameState.moveCounter;
+  document.querySelector('.flags-nr').innerText = gameState.flagCounter;
+  document.querySelector('.time').innerText = formatTime(gameState.timer);
   fieldMatrix.length = 0;
 
   const restartBlock = document.querySelector('.game-status');
@@ -541,14 +617,14 @@ const restart = () => {
   setParametersSection();
   setField();
   start();
-  handleRestartClick();//???
+  handleRestartClick();
 }
 
 const handleRestartClick = () => {
   document.querySelector('.game-status').addEventListener('click', (e) => {
     if (e.target.className === 'restart') {
       restart();
-      if (soundOn) { flagFX.play() };
+      if (gameState.soundOn) { flagFX.play() };
     }
   });
 }
@@ -558,7 +634,13 @@ setHeader();
 setParametersSection();
 switchSound();
 setField();
-start();
+if (gameState.firstTime) {
+  start();
+} else {
+  handleClicks();
+  displayParameters();
+  countTime();
+}
 handleRestartClick();
 
 getDifficulty();
