@@ -200,10 +200,10 @@ const activateBurger = () => {
       document.querySelector('.overlay').addEventListener('click', () => {
         burger.classList.remove('active');
         menu.classList.remove('open');
-        removeOverlay(menu);
+        removeOverlay();
       })
     } else {
-      removeOverlay(menu);
+      removeOverlay();
     }
   })
 }
@@ -215,11 +215,76 @@ const addOverlay = (element) => {
   body.classList.add('disable-scroll')
 }
 
-const removeOverlay = (element) => {
+const removeOverlay = () => {
   const overlay = document.querySelector('.overlay');
   overlay.remove();
   body.classList.remove('disable-scroll')
 }
+
+// ----------------------------------------------------
+
+// Stats-modal
+const buildStatsPopUp = () => {
+  const popUpWrapper = makeDiv('popup-wrapper');
+  const popUp = makeDiv('popup');
+  
+  const closeSign = makeDiv('close-sign');
+  closeSign.innerHTML = '<i class="fa-regular fa-circle-xmark"></i>';
+  popUp.append(closeSign);
+
+  const statHeader = makeDiv('stat-header');
+  const headers = [
+    '<i class="fa-solid fa-table-cells"></i>',
+    '<i class="fa-solid fa-virus"></i>',
+    '<i class="fa-solid fa-arrow-pointer"></i>',
+    '<i class="fa-solid fa-stopwatch"></i>'
+  ];
+  headers.forEach(header => {
+    const colHead = makeDiv('col-head');
+    colHead.innerHTML = header;
+    statHeader.append(colHead);
+  })
+  popUp.append(statHeader)
+
+  gameStats.forEach(row => {
+    const statRow = makeDiv('stat-row');
+    for (const prop in row) {
+      const tableCell = makeDiv('stats-table-cell');
+      tableCell.innerText = row[prop];
+      statRow.append(tableCell);
+    }
+    popUp.append(statRow);
+  })
+  popUpWrapper.append(popUp)
+  body.append(popUpWrapper);
+  popUp.classList.add('popup_active')
+  addOverlay(popUpWrapper);
+}
+
+const showStats = () => {
+  document.querySelector('#stats').addEventListener('click', (e) => {
+    console.log('stats clicked');
+    buildStatsPopUp();
+        
+    const closePopup = (e) => {
+      const popUp = document.querySelector('.popup')
+      const popUpWrapper = document.querySelector('.popup-wrapper')
+      if ((e.target.classList.contains('close-sign'))
+        || (e.target.parentElement.classList.contains('close-sign')) 
+        || (e.target.classList.contains('popup-wrapper'))
+        || (e.target.classList.contains('popup')))
+        {
+          popUp.classList.remove('popup_active')
+          popUpWrapper.remove();
+          removeOverlay();
+          body.removeEventListener('click', closePopup);
+        }
+    }
+
+    body.addEventListener('click', closePopup);
+  })
+}
+
 
 // ----------------------------------------------------
 
@@ -291,7 +356,7 @@ const setHeader = () => {
       <div class="menu_item">
         <label for="bombs-qty">
           Bombs:&nbsp;                 
-        <input id="bombs-qty" type="number" min="10" max="99" placeholder="10">
+        <input id="bombs-qty" type="number" min="10" max="99" placeholder="${gameState.bombsNumber}">
         </label>
         
       </div>
@@ -693,6 +758,5 @@ if (gameState.firstTime) {
 }
 handleRestartClick();
 
+showStats();
 getDifficulty();
-
-
