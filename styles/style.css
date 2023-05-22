@@ -488,7 +488,7 @@ width: fit-content;
     display: flex;
   }
 
-  .menu{
+  .menu {
       display: flex;
       flex-direction: column;
       justify-content: flex-start;

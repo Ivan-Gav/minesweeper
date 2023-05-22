@@ -263,7 +263,12 @@ const buildStatsPopUp = () => {
 
 const showStats = () => {
   document.querySelector('#stats').addEventListener('click', (e) => {
-    console.log('stats clicked');
+    // close burger menu before showing popUp, when 'stats' clicked.
+    const burger = document.querySelector('.burger');
+    if (burger.classList.contains('active')) {
+      burger.dispatchEvent(new Event('click'));
+    }
+    
     buildStatsPopUp();
         
     const closePopup = (e) => {
@@ -456,7 +461,6 @@ const setField = () => {
   field.classList.add(`fieldsize-${gameState.cellNr}`);
 
   if (fieldMatrix.length == (gameState.cellNr * gameState.cellNr)) {
-    console.log('get cells from storage')
     for (let i = 0; i < gameState.cellNr; i++) {
       const row = makeDiv('row');
       for (let j = 0; j < gameState.cellNr; j++) {
@@ -476,7 +480,6 @@ const setField = () => {
       field.append(row);
     }
   } else {
-    console.log('build new cells')
     for (let i = 0; i < gameState.cellNr; i++) {
       const row = makeDiv('row');
       for (let j = 0; j < gameState.cellNr; j++) {
@@ -620,7 +623,6 @@ const start = () => {
     const cell = e.target;
     if (cell.classList.contains('cell')) {
       const nr = cell.dataset.number
-      console.log(`frst click - row ${cell.dataset.row}, column ${cell.dataset.col}, number ${cell.dataset.number}`);
       plantBombs(gameState.bombsNumber, nr);
       gameState.moveCounter++;
       document.querySelector('.bombs-nr').innerText = gameState.bombsNumber;
@@ -702,7 +704,6 @@ const updateStats = () => {
   };
   gameStats.unshift(gameResult);
   gameStats.length = 10;
-  console.log(gameStats);
   localStorage.setItem('gameStats', JSON.stringify(gameStats)); 
 }
 // ----------------------------------------------------
