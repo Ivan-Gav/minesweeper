@@ -3,7 +3,7 @@
 Classic game written in pure JavaScript was made as part of [RS School JS Frontend course](https://rs.school/js/).
 If you're interested, here is the [link](https://github.com/rolling-scopes-school/tasks/tree/master/tasks/minesweeper) to the detailed description of the task.
 
-You can play the game [here]()
+You can play the game [here](https://ivan-gav.github.io/minesweeper/)
 
 ### Technology stack:
 - JavaScript
